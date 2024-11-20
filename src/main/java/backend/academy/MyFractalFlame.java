@@ -11,8 +11,8 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sin;
 
 public class MyFractalFlame {
-    private static final int WIDTH = 1920; // Ширина изображения
-    private static final int HEIGHT = 1080; // Высота изображения
+    private static final int WIDTH = 800; // Ширина изображения
+    private static final int HEIGHT = 800; // Высота изображения
     private static final int MAX_ITERATIONS = 100000000; // Количество итераций
     private static final int NUM_FUNCTIONS = 6; // Число аффинных преобразований
 
@@ -33,19 +33,32 @@ public class MyFractalFlame {
 
     // Генерация случайных аффинных преобразований
     private static void generateAffineTransforms() {
+        // Предустановленные красивые цвета
+        double[][] predefinedColors = {
+            {255, 223, 0},    // Золотой
+            {219, 112, 147},  // Фиолетово-розовый
+            {72, 61, 139},    // Темно-фиолетовый
+            {30, 144, 255},   // Синий
+            {186, 85, 211},   // Фиолетовый
+            {135, 206, 200}   // Голубой
+        };
+
         for (int i = 0; i < NUM_FUNCTIONS; i++) {
             for (int j = 0; j < 6; j++) {
                 coefficients[i][j] = random.nextDouble() * 2 - 1; // Коэффициенты в диапазоне [-1, 1]
             }
 
-            //r, g, b optimised values
-            coefficients[i][6] = random.nextDouble() *240 + 15;
-            coefficients[i][7] = random.nextDouble() *240 + 15;
-            coefficients[i][8] = random.nextDouble() *240 + 15;
+            // Назначаем предустановленные цвета циклично
+            int colorIndex = i % predefinedColors.length;
+            coefficients[i][6] = predefinedColors[colorIndex][0]; // R
+            coefficients[i][7] = predefinedColors[colorIndex][1]; // G
+            coefficients[i][8] = predefinedColors[colorIndex][2]; // B
+
             probabilities[i] = random.nextDouble(); // Вероятности выбора
         }
         normalizeProbabilities();
     }
+
 
     // Нормализация вероятностей
     private static void normalizeProbabilities() {
@@ -58,6 +71,10 @@ public class MyFractalFlame {
     private static BufferedImage generateFractal() {
         double x = 0, y = 0;
         double r, g, b; // RGB-значения для цветовой коррекции
+        int progressStep = MAX_ITERATIONS / 10; // Шаг для обновления прогресса
+        int nextProgressUpdate = progressStep;
+
+        System.out.println("Начало генерации фрактала...");
 
         for (int i = -20; i < MAX_ITERATIONS; i++) {
             int funcIndex = selectFunction();
@@ -81,19 +98,26 @@ public class MyFractalFlame {
 
             if (i > 0 && px >= 0 && px < WIDTH && py >= 0 && py < HEIGHT) {
                 densityHistogram[px][py]++;
-                if(densityHistogram[px][py] == 1) {
+                if (densityHistogram[px][py] == 1) {
                     colorHistogram[px][py][0] = r;
                     colorHistogram[px][py][1] = g;
                     colorHistogram[px][py][2] = b;
-                }
-                else {
+                } else {
                     colorHistogram[px][py][0] = (colorHistogram[px][py][0] + r) / 2;
                     colorHistogram[px][py][1] = (colorHistogram[px][py][1] + g) / 2;
                     colorHistogram[px][py][2] = (colorHistogram[px][py][2] + b) / 2;
                 }
             }
+
+            // Обновление прогресса
+            if (i >= nextProgressUpdate) {
+                int progressPercent = (int) ((i / (double) MAX_ITERATIONS) * 100);
+                System.out.println("Прогресс: " + progressPercent + "%");
+                nextProgressUpdate += progressStep;
+            }
         }
 
+        System.out.println("Генерация завершена!");
         return applyColorCorrection();
     }
 
@@ -137,28 +161,50 @@ public class MyFractalFlame {
         }
         return probabilities.length - 1;
     }
-
     // Применение вариаций
     private static double[] applyVariation(double x, double y, int funcIndex) {
         double[] result = new double[2];
+        double r2 = x * x + y * y; // Используется для некоторых вариаций
 
-        switch (funcIndex % 3) {
+        switch (funcIndex % 5) { // Увеличено количество вариантов
             case 0: // Linear
                 result[0] = x;
                 result[1] = y;
                 break;
-            case 1: // Sinusoidal
-                result[0] = x - 1/x;
-                result[1] = y - 1/y*y;
+
+            case 1: // Sinusoidal + Spherical
+                result[0] = sin(x) / r2;
+                result[1] = sin(y) / r2;
                 break;
-            case 2: // Spherical
-                double r2 = x * x + y * y;
-                result[0] = x / r2;
-                result[1] = y / r2;
+
+            case 2: // Spherical + Swirl
+                double swirl = sin(r2) - cos(r2);
+                result[0] = x * swirl / r2;
+                result[1] = y * swirl / r2;
+                break;
+
+            case 3: // Horseshoe
+                double horseshoeR = Math.sqrt(r2);
+                result[0] = (x - y) * (x + y) / horseshoeR;
+                result[1] = 2 * x * y / horseshoeR;
+                break;
+
+            case 4: // Polar + Bubble
+                double theta = Math.atan2(y, x);
+                double bubble = 4 / (r2 + 4);
+                result[0] = theta / Math.PI * bubble;
+                result[1] = Math.sqrt(r2) * bubble;
+                break;
+
+            default: // Фallback: Linear + Spherical
+                result[0] = x / (1 + r2);
+                result[1] = y / (1 + r2);
                 break;
         }
+
         return result;
     }
+
 
     // Нахождение максимальной плотности
     private static int findMaxDensity() {
