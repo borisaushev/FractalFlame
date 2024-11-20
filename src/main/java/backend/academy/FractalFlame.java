@@ -7,8 +7,8 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 public class FractalFlame {
-    private static final int WIDTH = 800; // Ширина изображения
-    private static final int HEIGHT = 800; // Высота изображения
+    private static final int WIDTH = 1400; // Ширина изображения
+    private static final int HEIGHT = 1000; // Высота изображения
     private static final int MAX_ITERATIONS = 10000000; // Количество итераций
     private static final int NUM_FUNCTIONS = 6; // Число аффинных преобразований
 
@@ -131,8 +131,8 @@ public class FractalFlame {
                 result[1] = y;
                 break;
             case 1: // Sinusoidal
-                result[0] = Math.sin(x);
-                result[1] = Math.sin(y);
+                result[0] = x - 1/x;
+                result[1] = y - 1/y*y;
                 break;
             case 2: // Spherical
                 double r2 = x * x + y * y;
