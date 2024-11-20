@@ -5,16 +5,20 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Random;
 import javax.imageio.ImageIO;
+import static java.lang.Math.cos;
+import static java.lang.Math.log10;
+import static java.lang.Math.pow;
+import static java.lang.Math.sin;
 
 public class MyFractalFlame {
-    private static final int WIDTH = 1400; // Ширина изображения
-    private static final int HEIGHT = 1000; // Высота изображения
-    private static final int MAX_ITERATIONS = 10000000; // Количество итераций
+    private static final int WIDTH = 1920; // Ширина изображения
+    private static final int HEIGHT = 1080; // Высота изображения
+    private static final int MAX_ITERATIONS = 100000000; // Количество итераций
     private static final int NUM_FUNCTIONS = 6; // Число аффинных преобразований
 
     private static Random random = new Random();
 
-    private static double[][] coefficients = new double[NUM_FUNCTIONS][6]; // Матрицы для аффинных преобразований
+    private static double[][] coefficients = new double[NUM_FUNCTIONS][9]; // Матрицы для аффинных преобразований
     private static double[] probabilities = new double[NUM_FUNCTIONS]; // Вероятности выбора функции
 
     private static double[][][] colorHistogram = new double[WIDTH][HEIGHT][3]; // Гистограмма цвета (RGB)
@@ -33,6 +37,11 @@ public class MyFractalFlame {
             for (int j = 0; j < 6; j++) {
                 coefficients[i][j] = random.nextDouble() * 2 - 1; // Коэффициенты в диапазоне [-1, 1]
             }
+
+            //r, g, b optimised values
+            coefficients[i][6] = random.nextDouble() *240 + 15;
+            coefficients[i][7] = random.nextDouble() *240 + 15;
+            coefficients[i][8] = random.nextDouble() *240 + 15;
             probabilities[i] = random.nextDouble(); // Вероятности выбора
         }
         normalizeProbabilities();
@@ -62,9 +71,9 @@ public class MyFractalFlame {
             y = result[1];
 
             // Генерация цвета
-            r = Math.abs(Math.sin(funcIndex * Math.PI / 3))*255;
-            g = Math.abs(Math.cos(funcIndex * Math.PI / 5))*255;
-            b = Math.abs(Math.sin(funcIndex * Math.PI / 7))*255;
+            r = coefficients[funcIndex][6];
+            g = coefficients[funcIndex][7];
+            b = coefficients[funcIndex][8];
 
             // Преобразование в пиксели
             int px = (int) ((x + 1) / 2.0 * WIDTH);
@@ -80,7 +89,7 @@ public class MyFractalFlame {
                 else {
                     colorHistogram[px][py][0] = (colorHistogram[px][py][0] + r) / 2;
                     colorHistogram[px][py][1] = (colorHistogram[px][py][1] + g) / 2;
-                    colorHistogram[px][py][2] += (colorHistogram[px][py][2] + b) / 2;
+                    colorHistogram[px][py][2] = (colorHistogram[px][py][2] + b) / 2;
                 }
             }
         }
@@ -94,20 +103,20 @@ public class MyFractalFlame {
 
         // Нахождение максимального значения плотности
         int maxDensity = findMaxDensity();
+        double maxNormal = log10(maxDensity);
+        double gamma = 1.5;
 
         for (int i = 0; i < WIDTH; i++) {
             for (int j = 0; j < HEIGHT; j++) {
                 if (densityHistogram[i][j] > 0) {
-                    // Нормализация цвета
-                    double r = colorHistogram[i][j][0] / densityHistogram[i][j];
-                    double g = colorHistogram[i][j][1] / densityHistogram[i][j];
-                    double b = colorHistogram[i][j][2] / densityHistogram[i][j];
+                    double normal = log10(densityHistogram[i][j]);
 
-                    // Плотностное взвешивание цвета
-                    double intensity = Math.log(1 + densityHistogram[i][j]) / Math.log(1 + maxDensity);
-                    int red = Math.min(255, (int) (r * intensity * 255));
-                    int green = Math.min(255, (int) (g * intensity * 255));
-                    int blue = Math.min(255, (int) (b * intensity * 255));
+                    normal /= maxNormal;
+
+                    // Плотностное взвешивание цвета*/
+                    int red = (int) (colorHistogram[i][j][0]*pow(normal, (1.0 / gamma)));
+                    int green = (int) (colorHistogram[i][j][1]*pow(normal, (1.0 / gamma)));
+                    int blue =(int) (colorHistogram[i][j][2]*pow(normal, (1.0 / gamma)));
 
                     image.setRGB(i, j, new Color(red, green, blue).getRGB());
                 } else {
@@ -132,6 +141,7 @@ public class MyFractalFlame {
     // Применение вариаций
     private static double[] applyVariation(double x, double y, int funcIndex) {
         double[] result = new double[2];
+
         switch (funcIndex % 3) {
             case 0: // Linear
                 result[0] = x;
