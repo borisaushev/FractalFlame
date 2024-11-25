@@ -6,14 +6,14 @@ import lombok.Getter;
 
 @Getter
 public class AffineTransformation implements TransformationFunction {
-    private final int a;
-    private final int b;
-    private final int c;
-    private final int d;
-    private final int e;
-    private final int f;
+    private final double a;
+    private final double b;
+    private final double c;
+    private final double d;
+    private final double e;
+    private final double f;
 
-    public AffineTransformation(int a, int b, int c, int d, int e, int f) {
+    public AffineTransformation(double a, double b, double c, double d, double e, double f) {
         this.a = a;
         this.b = b;
         this.c = c;
