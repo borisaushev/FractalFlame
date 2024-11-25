@@ -4,6 +4,7 @@ import backend.academy.fractal.parameters.FractalParameters;
 
 public class FractalGenerator {
     private final FractalParameters parameters;
+
     public FractalGenerator(FractalParameters parameters) {
         this.parameters = parameters;
     }
@@ -13,7 +14,6 @@ public class FractalGenerator {
         /*
 
          */
-
 
         return null;
     }

@@ -4,11 +4,12 @@ import com.google.common.util.concurrent.AtomicDouble;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.imageio.ImageIO;
 import static java.lang.Math.cos;
 import static java.lang.Math.log10;
@@ -16,17 +17,18 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sin;
 
 public class MyFractalFlame {
-    private static final int WIDTH = 2000; // Ширина изображения
-    private static final int HEIGHT = 2000; // Высота изображения
-    private static final int MAX_ITERATIONS = 100000000; // Количество итераций
+    public static final double GAMMA = 2.2;
+    private static final int WIDTH = 4000; // Ширина изображения
+    private static final int HEIGHT = 4000; // Высота изображения
+    private static final int MAX_ITERATIONS = 2_000_000_000; // Количество итераций
     private static final int NUM_FUNCTIONS = 6; // Число аффинных преобразований
-    private static final int THREAD_COUNT = 4; // Число потоков
+    private static final int THREAD_COUNT = 5; // Число потоков
     private static final int[][] densityHistogram = new int[WIDTH][HEIGHT]; // Плотность точек
     private static Random random = new Random();
     private static double[][] coefficients = new double[NUM_FUNCTIONS][9]; // Матрицы для аффинных преобразований
     private static double[] probabilities = new double[NUM_FUNCTIONS]; // Вероятности выбора функции
     private static AtomicDouble[][][] colorHistogram = new AtomicDouble[WIDTH][HEIGHT][3]; // Гистограмма цвета (RGB)
-    public static AtomicInteger progress = new AtomicInteger(0);
+    public static volatile int progress = 0;
 
     public static void main(String[] args) throws InterruptedException {
         for (int i = 0; i < colorHistogram.length; i++) {
@@ -49,12 +51,17 @@ public class MyFractalFlame {
     private static void generateAffineTransforms() {
         double[][] predefinedColors = {
             {255, 223, 0},    // Золотой
-            {255, 50, 50},  // Красный
             {30, 240, 80},    // Зеленый
             {30, 144, 255},   // Синий
+            {255, 50, 50},  // Красный
             {186, 85, 111},   // Фиолетовый
             {135, 206, 200}   // Голубой
         };
+        var list = Arrays.asList(predefinedColors);
+        Collections.shuffle(list);
+        for (int i = 0; i < list.size(); i++) {
+            predefinedColors[i] = list.get(i);
+        }
 
         for (int i = 0; i < NUM_FUNCTIONS; i++) {
             for (int j = 0; j < 6; j++) {
@@ -93,6 +100,10 @@ public class MyFractalFlame {
             executor.execute(() -> processIterations(start, end));
         }
         executor.shutdown();
+        while (!executor.isTerminated()) {
+            System.out.println("Completed: " + (int) ((double) (progress) / MAX_ITERATIONS * 100) + "%");
+            executor.awaitTermination(1, TimeUnit.SECONDS);
+        }
         executor.awaitTermination(1000, TimeUnit.SECONDS);
 
         System.out.println("Генерация завершена!");
@@ -103,11 +114,8 @@ public class MyFractalFlame {
         double x = 0, y = 0;
         double r, g, b;
 
-        for (int i = start; i < end; i++) {
-
-            if(progress.incrementAndGet() % (MAX_ITERATIONS/10) == 0) {
-                System.out.println("Completed: " + (int) ((double) (progress.get())/MAX_ITERATIONS*100) + "%");
-            }
+        for (int i = start - 20; i < end; i++) {
+            progress++;
             int funcIndex = selectFunction();
             double[] transform = coefficients[funcIndex];
             double newX = transform[0] * x + transform[1] * y + transform[2];
@@ -124,7 +132,7 @@ public class MyFractalFlame {
             int px = (int) ((x + 1) / 2.0 * WIDTH);
             int py = (int) ((y + 1) / 2.0 * HEIGHT);
 
-            if (i > 0 && px >= 0 && px < WIDTH && py >= 0 && py < HEIGHT) {
+            if (i > start && px >= 0 && px < WIDTH && py >= 0 && py < HEIGHT) {
                 densityHistogram[px][py]++;
                 if (densityHistogram[px][py] == 1) {
                     colorHistogram[px][py][0].set(r);
@@ -149,7 +157,6 @@ public class MyFractalFlame {
 
         int maxDensity = findMaxDensity();
         double maxNormal = log10(maxDensity);
-        double gamma = 1.5;
 
         for (int i = 0; i < WIDTH; i++) {
             for (int j = 0; j < HEIGHT; j++) {
@@ -158,10 +165,10 @@ public class MyFractalFlame {
                     normal /= maxNormal;
 
                     double finalNormal = normal;
-                    int red = (int) (colorHistogram[i][j][0].updateAndGet(a -> a * pow(finalNormal, (1.0 / gamma))));
+                    int red = (int) (colorHistogram[i][j][0].updateAndGet(a -> a * pow(finalNormal, (1.0 / GAMMA))));
                     double finalNormal1 = normal;
-                    int green = (int) (colorHistogram[i][j][1].updateAndGet(a -> a * pow(finalNormal1, (1.0 / gamma))));
-                    int blue = (int) (colorHistogram[i][j][2].updateAndGet(a -> a * pow(finalNormal1, (1.0 / gamma))));
+                    int green = (int) (colorHistogram[i][j][1].updateAndGet(a -> a * pow(finalNormal1, (1.0 / GAMMA))));
+                    int blue = (int) (colorHistogram[i][j][2].updateAndGet(a -> a * pow(finalNormal1, (1.0 / GAMMA))));
 
                     red = Math.min(255, red);
                     green = Math.min(255, green);
@@ -194,8 +201,8 @@ public class MyFractalFlame {
 
         switch (funcIndex % 5) {
             case 0:
-                result[0] = x;
-                result[1] = y;
+                result[0] = x / (1 + r2);
+                result[1] = y / (1 + r2);
                 break;
             case 1:
                 result[0] = sin(x) / r2;
