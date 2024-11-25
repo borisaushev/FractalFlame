@@ -2,27 +2,21 @@ package backend.academy.fractal.parameters.source.impl;
 
 import backend.academy.fractal.grid.Frame;
 import backend.academy.fractal.parameters.FractalParameters;
+import backend.academy.fractal.parameters.ParametersGenerator;
 import backend.academy.fractal.parameters.source.ParameterSource;
 import backend.academy.fractal.transformation.FractalTransformation;
 import backend.academy.fractal.transformation.NonLinearTransformation;
 import backend.academy.fractal.transformation.color.TransformationColor;
 import backend.academy.fractal.transformation.impl.AffineTransformation;
-import java.awt.Color;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Scanner;
-
+//TODO: test
 public class CLIParametersSource implements ParameterSource {
     private static final Scanner scanner = new Scanner(System.in);
-    private static final Random random = new Random();
 
     public Optional<FractalParameters> getParameters() {
-        //TODO exception handling
-
         Optional<Frame> optionalFrame = getFrame();
         if (optionalFrame.isEmpty()) {
             return Optional.empty();
@@ -46,7 +40,7 @@ public class CLIParametersSource implements ParameterSource {
         return Optional.of(new FractalParameters(frame, transformations, iterations));
     }
 
-    private Optional<Integer> getIterations() {
+    public Optional<Integer> getIterations() {
         System.out.println("Введите количество итераций");
         String input = scanner.nextLine();
         try {
@@ -57,14 +51,13 @@ public class CLIParametersSource implements ParameterSource {
         }
     }
 
-    private Optional<List<FractalTransformation>> getTransformationsList() {
+    public Optional<List<FractalTransformation>> getTransformationsList() {
         try {
             System.out.println("Введите введите количество преобразований (не больше 6)");
             System.out.println("(Пустая строка для генерации 6 преобразований)");
             String input = scanner.nextLine();
-            if(input.isEmpty()) {
-                //TODO: implement
-                return Optional.of(generateTransformations());
+            if (input.isEmpty()) {
+                return Optional.of(ParametersGenerator.generateTransformations());
             }
 
             int count = Integer.parseInt(input);
@@ -76,11 +69,16 @@ public class CLIParametersSource implements ParameterSource {
             System.out.println(colorList());
 
             List<FractalTransformation> list = new LinkedList<>();
-            for(int i = 0; i < count; i++) {
-                AffineTransformation affineTransformation = getAffineTransformation(input);
-                List<NonLinearTransformation> nonLinearTransformationList = getTransformationList();
-                TransformationColor color = getTransformationColor();
-                list.add(new FractalTransformation(affineTransformation, nonLinearTransformationList, color));
+            for (int i = 0; i < count; i++) {
+                Optional<AffineTransformation> affineTransformation = getAffineTransformation();
+                Optional<List<NonLinearTransformation>> optionalNonLinearList = getTransformationList();
+                Optional<TransformationColor> optionalColor = getTransformationColors();
+                if (affineTransformation.isEmpty() || optionalColor.isEmpty() || optionalNonLinearList.isEmpty()) {
+                    continue;
+                }
+
+                list.add(new FractalTransformation(
+                    affineTransformation.get(), optionalNonLinearList.get(), optionalColor.get()));
             }
             return Optional.of(list);
         } catch (NumberFormatException exc) {
@@ -88,45 +86,8 @@ public class CLIParametersSource implements ParameterSource {
         }
     }
 
-    private List<FractalTransformation> generateTransformations() {
-        TransformationColor[] predefinedColors = TransformationColor.values();
-
-        int functionsCount = 6;
-        List<FractalTransformation> result = new LinkedList<>();
-        for (int i = 0; i < functionsCount; i++) {
-            double[] coefficients = new double[6];
-            for (int j = 0; j < 6; j++) {
-                coefficients[j] = random.nextDouble() * 2 - 1; // Коэффициенты в диапазоне [-1, 1]
-            }
-
-            AffineTransformation affineTransformation = new AffineTransformation(
-              coefficients[0],
-              coefficients[1],
-              coefficients[2],
-              coefficients[3],
-              coefficients[4],
-              coefficients[5]
-            );
-            List<NonLinearTransformation> nonLinearList = new LinkedList<>();
-            int nonLinearFunctionsCount = random.nextInt(NonLinearTransformation.values().length) + 1;
-            for(int j = 0; j < nonLinearFunctionsCount; j++) {
-                int index = random.nextInt(NonLinearTransformation.values().length) + 1;
-                NonLinearTransformation transformation = NonLinearTransformation.getByIndex(index).get();
-                nonLinearList.add(transformation);
-            }
-
-            int colorIndex = i % predefinedColors.length;
-            TransformationColor color = predefinedColors[colorIndex];
-
-            result.add(new FractalTransformation(affineTransformation, nonLinearList, color));
-        }
-
-        return result;
-    }
-
     private String colorList() {
         StringBuilder colorList = new StringBuilder();
-        //without var it takes the whole line
         for (var color : TransformationColor.values()) {
             colorList.append(color.index());
             colorList.append(". ");
@@ -136,45 +97,74 @@ public class CLIParametersSource implements ParameterSource {
         return colorList.toString();
     }
 
-    private TransformationColor getTransformationColor() {
+    private Optional<TransformationColor> getTransformationColors() {
         System.out.println("Выберите цвет преобразования");
         String input = scanner.nextLine();
         int index = Integer.parseInt(input);
-        Optional<TransformationColor> optionalColor = TransformationColor.getByIndex(index);
-
-        return null;
+        return TransformationColor.getByIndex(index);
     }
 
-    private AffineTransformation getAffineTransformation(String input) {
-        System.out.println("Введите параметры линейного преобразования (6 чисел через пробел)");
-        //TODO: implement
+    public Optional<AffineTransformation> getAffineTransformation() {
+        System.out.println("Введите параметры линейного преобразования (6 чисел в диапазоне [-1, 1] через пробел)");
         System.out.println("(Пустая строка для генерации параметров)");
-        input = scanner.nextLine();
-        //TODO: parse
 
-        return null;
+        String input = scanner.nextLine();
+        if(input.isEmpty()) {
+            return Optional.of(ParametersGenerator.generateAffineTransformation());
+        }
+
+        try {
+            String[] numbers = input.split(" ");
+            double[] coefficients = new double[6];
+            for (int j = 0; j < 6; j++) {
+                double value = Double.parseDouble(numbers[j]);
+                if(value > 1 || value < -1) {
+                    return Optional.empty();
+                }
+                coefficients[j] = value;
+            }
+
+            AffineTransformation affineTransformation = new AffineTransformation(
+                coefficients[0],
+                coefficients[1],
+                coefficients[2],
+                coefficients[3],
+                coefficients[4],
+                coefficients[5]
+            );
+
+            return Optional.of(affineTransformation);
+        } catch (NumberFormatException exc) {
+            return Optional.empty();
+        }
     }
 
-    private List<NonLinearTransformation> getTransformationList() {
+    public Optional<List<NonLinearTransformation>> getTransformationList() {
         System.out.println("Введите соответствующие ему нелинейные преобразования через пробел");
-
-        //TODO: implement
         System.out.println("(Пустая строка для генерации параметров)");
 
         String input = scanner.nextLine();
 
-        List<NonLinearTransformation> list = new LinkedList<>();
-        String[] parameters = input.split(" ");
-        for (String parameter : parameters) {
-            int index = Integer.parseInt(parameter);
-            var optionalTransformation = NonLinearTransformation.getByIndex(index);
-            optionalTransformation.ifPresent(list::add);
+        if(input.isEmpty()) {
+            return Optional.of(ParametersGenerator.generateNonLinearTransformationList());
+        }
+
+        try {
+            List<NonLinearTransformation> list = new LinkedList<>();
+            String[] parameters = input.split(" ");
+            for (String parameter : parameters) {
+                int index = Integer.parseInt(parameter);
+                var optionalTransformation = NonLinearTransformation.getByIndex(index);
+                optionalTransformation.ifPresent(list::add);
+            }
+            return Optional.of(list);
+        } catch (NumberFormatException exc) {
+            return Optional.empty();
         }
     }
 
     private String transformationsList() {
         StringBuilder transformationsList = new StringBuilder();
-        //without var it takes the whole line
         for (var transformation : NonLinearTransformation.values()) {
             transformationsList.append(transformation.index());
             transformationsList.append(". ");
