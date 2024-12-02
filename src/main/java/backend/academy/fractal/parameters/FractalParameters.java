@@ -10,4 +10,5 @@ public record FractalParameters(
     List<FractalTransformation> transformations,
     int iterations
 ) {
+    public final static int MIN_ITERATIONS = 1000;
 }

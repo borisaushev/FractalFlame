@@ -3,6 +3,7 @@ package backend.academy.fractal.parameters.source.impl;
 import backend.academy.fractal.grid.Frame;
 import backend.academy.fractal.parameters.FractalParameters;
 import backend.academy.fractal.parameters.ParametersGenerator;
+import backend.academy.fractal.parameters.source.CLInputSource;
 import backend.academy.fractal.parameters.source.ParameterSource;
 import backend.academy.fractal.transformation.FractalTransformation;
 import backend.academy.fractal.transformation.NonLinearTransformation;
@@ -11,10 +12,12 @@ import backend.academy.fractal.transformation.impl.AffineTransformation;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Scanner;
+import org.springframework.beans.factory.annotation.Autowired;
+
 //TODO: test
-public class CLIParametersSource implements ParameterSource {
-    private static final Scanner scanner = new Scanner(System.in);
+public class CLIParametersParser implements ParameterSource {
+    @Autowired
+    private CLInputSource clReader;
 
     public Optional<FractalParameters> getParameters() {
         Optional<Frame> optionalFrame = getFrame();
@@ -22,8 +25,7 @@ public class CLIParametersSource implements ParameterSource {
             return Optional.empty();
         }
 
-        Optional<List<FractalTransformation>> optionalTransformations
-            = getTransformationsList();
+        Optional<List<FractalTransformation>> optionalTransformations = getTransformationsList();
         if (optionalTransformations.isEmpty()) {
             return Optional.empty();
         }
@@ -42,9 +44,12 @@ public class CLIParametersSource implements ParameterSource {
 
     public Optional<Integer> getIterations() {
         System.out.println("Введите количество итераций");
-        String input = scanner.nextLine();
+        String input = clReader.nextLine();
         try {
             int iterations = Integer.parseInt(input);
+            if (iterations < FractalParameters.MIN_ITERATIONS) {
+                return Optional.empty();
+            }
             return Optional.of(iterations);
         } catch (NumberFormatException exc) {
             return Optional.empty();
@@ -55,12 +60,15 @@ public class CLIParametersSource implements ParameterSource {
         try {
             System.out.println("Введите введите количество преобразований (не больше 6)");
             System.out.println("(Пустая строка для генерации 6 преобразований)");
-            String input = scanner.nextLine();
+            String input = clReader.nextLine();
             if (input.isEmpty()) {
                 return Optional.of(ParametersGenerator.generateTransformations());
             }
 
             int count = Integer.parseInt(input);
+            if(count <= 0) {
+                return Optional.empty();
+            }
 
             System.out.println("Возможные нелинейные преобразования:");
             System.out.println(transformationsList());
@@ -71,10 +79,16 @@ public class CLIParametersSource implements ParameterSource {
             List<FractalTransformation> list = new LinkedList<>();
             for (int i = 0; i < count; i++) {
                 Optional<AffineTransformation> affineTransformation = getAffineTransformation();
-                Optional<List<NonLinearTransformation>> optionalNonLinearList = getTransformationList();
+                if (affineTransformation.isEmpty()) {
+                    return Optional.empty();
+                }
+                Optional<List<NonLinearTransformation>> optionalNonLinearList = getNLTransformationsList();
+                if (optionalNonLinearList.isEmpty()) {
+                    return Optional.empty();
+                }
                 Optional<TransformationColor> optionalColor = getTransformationColors();
-                if (affineTransformation.isEmpty() || optionalColor.isEmpty() || optionalNonLinearList.isEmpty()) {
-                    continue;
+                if (optionalColor.isEmpty()) {
+                    return Optional.empty();
                 }
 
                 list.add(new FractalTransformation(
@@ -97,19 +111,23 @@ public class CLIParametersSource implements ParameterSource {
         return colorList.toString();
     }
 
-    private Optional<TransformationColor> getTransformationColors() {
-        System.out.println("Выберите цвет преобразования");
-        String input = scanner.nextLine();
-        int index = Integer.parseInt(input);
-        return TransformationColor.getByIndex(index);
+    public Optional<TransformationColor> getTransformationColors() {
+        try {
+            System.out.println("Выберите цвет преобразования");
+            String input = clReader.nextLine();
+            int index = Integer.parseInt(input);
+            return TransformationColor.getByIndex(index);
+        } catch (NumberFormatException exc) {
+            return Optional.empty();
+        }
     }
 
     public Optional<AffineTransformation> getAffineTransformation() {
         System.out.println("Введите параметры линейного преобразования (6 чисел в диапазоне [-1, 1] через пробел)");
         System.out.println("(Пустая строка для генерации параметров)");
 
-        String input = scanner.nextLine();
-        if(input.isEmpty()) {
+        String input = clReader.nextLine();
+        if (input.isEmpty()) {
             return Optional.of(ParametersGenerator.generateAffineTransformation());
         }
 
@@ -118,7 +136,7 @@ public class CLIParametersSource implements ParameterSource {
             double[] coefficients = new double[6];
             for (int j = 0; j < 6; j++) {
                 double value = Double.parseDouble(numbers[j]);
-                if(value > 1 || value < -1) {
+                if (value > 1 || value < -1) {
                     return Optional.empty();
                 }
                 coefficients[j] = value;
@@ -134,18 +152,18 @@ public class CLIParametersSource implements ParameterSource {
             );
 
             return Optional.of(affineTransformation);
-        } catch (NumberFormatException exc) {
+        } catch (Exception exc) {
             return Optional.empty();
         }
     }
 
-    public Optional<List<NonLinearTransformation>> getTransformationList() {
+    public Optional<List<NonLinearTransformation>> getNLTransformationsList() {
         System.out.println("Введите соответствующие ему нелинейные преобразования через пробел");
         System.out.println("(Пустая строка для генерации параметров)");
 
-        String input = scanner.nextLine();
+        String input = clReader.nextLine();
 
-        if(input.isEmpty()) {
+        if (input.isEmpty()) {
             return Optional.of(ParametersGenerator.generateNonLinearTransformationList());
         }
 
@@ -155,7 +173,10 @@ public class CLIParametersSource implements ParameterSource {
             for (String parameter : parameters) {
                 int index = Integer.parseInt(parameter);
                 var optionalTransformation = NonLinearTransformation.getByIndex(index);
-                optionalTransformation.ifPresent(list::add);
+                if(optionalTransformation.isEmpty()) {
+                    return Optional.empty();
+                }
+                list.add(optionalTransformation.get());
             }
             return Optional.of(list);
         } catch (NumberFormatException exc) {
@@ -176,14 +197,14 @@ public class CLIParametersSource implements ParameterSource {
 
     public Optional<Frame> getFrame() {
         System.out.println("Введите размеры фрактала (ширина и высота в пикселях через пробел)");
-        String input = scanner.nextLine();
+        String input = clReader.nextLine();
         try {
             String[] parameters = input.split(" ");
             int width = Integer.parseInt(parameters[0]);
             int height = Integer.parseInt(parameters[1]);
 
             return Optional.of(new Frame(height, width));
-        } catch (NumberFormatException exc) {
+        } catch (Exception exc) {
             return Optional.empty();
         }
     }

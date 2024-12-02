@@ -18,11 +18,11 @@ import static java.lang.Math.sin;
 
 public class MyFractalFlame {
     public static final double GAMMA = 2.2;
-    private static final int WIDTH = 4000; // Ширина изображения
-    private static final int HEIGHT = 4000; // Высота изображения
-    private static final int MAX_ITERATIONS = 2_000_000_000; // Количество итераций
+    private static final int WIDTH = 1000; // Ширина изображения
+    private static final int HEIGHT = 1000; // Высота изображения
+    private static final int MAX_ITERATIONS = 40_000_000; // Количество итераций
     private static final int NUM_FUNCTIONS = 6; // Число аффинных преобразований
-    private static final int THREAD_COUNT = 5; // Число потоков
+    private static final int THREAD_COUNT = 3; // Число потоков
     private static final int[][] densityHistogram = new int[WIDTH][HEIGHT]; // Плотность точек
     private static Random random = new Random();
     private static double[][] coefficients = new double[NUM_FUNCTIONS][9]; // Матрицы для аффинных преобразований
