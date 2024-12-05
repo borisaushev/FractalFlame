@@ -57,8 +57,8 @@ class CLIParametersParserTest {
         // then
         assertTrue(params.isPresent());
         FractalParameters fractalParameters = params.get();
-        assertEquals(800, params.get().gridParameters().width());
-        assertEquals(600, params.get().gridParameters().height());
+        assertEquals(800, params.get().frame().width());
+        assertEquals(600, params.get().frame().height());
         assertEquals(2, fractalParameters.transformations().size());
         assertEquals(FractalParameters.MIN_ITERATIONS, fractalParameters.iterations());
     }

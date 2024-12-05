@@ -9,15 +9,17 @@ import java.util.List;
 import java.util.Random;
 
 public class ParametersGenerator {
+
+    public static final int DEFAULT_FUNCTIONS_COUNT = 100;
+
     private ParametersGenerator(){}
     private static final Random random = new Random();
 
     public static List<FractalTransformation> generateTransformations() {
         TransformationColor[] predefinedColors = TransformationColor.values();
 
-        int functionsCount = 6;
         List<FractalTransformation> result = new LinkedList<>();
-        for (int i = 0; i < functionsCount; i++) {
+        for (int i = 0; i < DEFAULT_FUNCTIONS_COUNT; i++) {
             AffineTransformation affineTransformation = generateAffineTransformation();
             List<NonLinearTransformation> nonLinearList = generateNonLinearTransformationList();
 
@@ -32,6 +34,7 @@ public class ParametersGenerator {
     public static List<NonLinearTransformation> generateNonLinearTransformationList() {
         List<NonLinearTransformation> nonLinearList = new LinkedList<>();
         int nonLinearFunctionsCount = random.nextInt(NonLinearTransformation.values().length) + 1;
+        nonLinearFunctionsCount = Math.min(3, nonLinearFunctionsCount);
         for (int j = 0; j < nonLinearFunctionsCount; j++) {
             int index = random.nextInt(NonLinearTransformation.values().length) + 1;
             NonLinearTransformation transformation = NonLinearTransformation.getByIndex(index).get();
@@ -46,7 +49,7 @@ public class ParametersGenerator {
             coefficients[j] = random.nextDouble() * 2 - 1; // Коэффициенты в диапазоне [-1, 1]
         }
 
-        AffineTransformation affineTransformation = new AffineTransformation(
+        return new AffineTransformation(
             coefficients[0],
             coefficients[1],
             coefficients[2],
@@ -54,8 +57,6 @@ public class ParametersGenerator {
             coefficients[4],
             coefficients[5]
         );
-
-        return affineTransformation;
     }
 
 }

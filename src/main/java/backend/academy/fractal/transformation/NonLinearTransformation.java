@@ -22,7 +22,7 @@ public enum NonLinearTransformation {
         double r = Math.sqrt(p.x() * p.x() + p.y() * p.y());
         double theta = atan2(p.y(), p.x());
         p.x(theta / PI);
-        p.y(r - 1);
+        p.y(r - (double) 1 /2);
     }),
     HEART(4, p -> {
         double theta = atan2(p.y(), p.x());

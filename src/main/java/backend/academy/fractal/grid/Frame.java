@@ -15,8 +15,13 @@ public final class Frame {
     }
 
     public FramePoint convertToFramePoint(BiUnitPoint point) {
-        int px = (int) ((point.x() + 1) / 2.0 * width());
-        int py = (int) ((point.y() + 1) / 2.0 * height());
+        int px = (int) ((point.x()) / 4.0 * width() + (double) width() / 2);
+        int py = (int) ((point.y()) / 4.0 * height() + (double) height() / 2);
         return new FramePoint(px, py);
+    }
+
+    public boolean pointInBounds(FramePoint point) {
+        return point.x() >= 0 && point.x() < width()
+            && point.y() >= 0 && point.y() < height();
     }
 }

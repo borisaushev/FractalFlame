@@ -5,8 +5,7 @@ import backend.academy.fractal.transformation.FractalTransformation;
 import java.util.List;
 
 public record FractalParameters(
-    Frame gridParameters,
-    //key - affine transformation, value - list of nonlinear transformations to be applied
+    Frame frame,
     List<FractalTransformation> transformations,
     int iterations
 ) {

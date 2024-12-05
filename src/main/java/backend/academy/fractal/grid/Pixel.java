@@ -18,6 +18,13 @@ public class Pixel {
     private int blue;
     private int hitCount;
 
+    public Pixel() {
+        red = 0;
+        green = 0;
+        blue = 0;
+        hitCount = 0;
+    }
+
     public void hit() {
         hitCount++;
     }

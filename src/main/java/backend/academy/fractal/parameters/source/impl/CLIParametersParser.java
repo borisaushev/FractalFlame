@@ -13,8 +13,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import static backend.academy.fractal.parameters.ParametersGenerator.DEFAULT_FUNCTIONS_COUNT;
 
-//TODO: test
+@Component
 public class CLIParametersParser implements ParameterSource {
     @Autowired
     private CLInputSource clReader;
@@ -58,8 +60,8 @@ public class CLIParametersParser implements ParameterSource {
 
     public Optional<List<FractalTransformation>> getTransformationsList() {
         try {
-            System.out.println("Введите введите количество преобразований (не больше 6)");
-            System.out.println("(Пустая строка для генерации 6 преобразований)");
+            System.out.println("Введите введите количество преобразований");
+            System.out.printf("(Пустая строка для генерации %d преобразований)\n", DEFAULT_FUNCTIONS_COUNT);
             String input = clReader.nextLine();
             if (input.isEmpty()) {
                 return Optional.of(ParametersGenerator.generateTransformations());
@@ -126,7 +128,7 @@ public class CLIParametersParser implements ParameterSource {
         System.out.println("Введите параметры линейного преобразования (6 чисел в диапазоне [-1, 1] через пробел)");
         System.out.println("(Пустая строка для генерации параметров)");
 
-        String input = clReader.nextLine();
+        String input = clReader.nextLine().trim();
         if (input.isEmpty()) {
             return Optional.of(ParametersGenerator.generateAffineTransformation());
         }
