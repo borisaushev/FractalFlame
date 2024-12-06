@@ -1,33 +1,34 @@
 package backend.academy.fractal.generator.impl;
 
+import backend.academy.fractal.generator.FractalGenerator;
+import backend.academy.fractal.grid.Frame;
 import backend.academy.fractal.grid.Pixel;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
-import static java.lang.Math.log10;
-import static java.lang.Math.pow;
 
-@Component
-public class GeneratorWithColorCorrection extends FractalGenerator {
+@Component("GeneratorWithColorCorrection")
+public class GeneratorWithColorCorrection extends SingleThreadFractalGenerator implements FractalGenerator {
+    public static final double GAMMA = 1.5;
+
     @Override
-    public Optional<Pixel[][]> generate() {
-        Optional<Pixel[][]> optionalGrid = super.generate();
+    public Optional<Frame> generate() {
+        Optional<Frame> optionalGrid = super.generate();
         if (optionalGrid.isEmpty()) {
             return Optional.empty();
         }
+
         applyColorCorrection(optionalGrid.get());
         return optionalGrid;
     }
 
-    private void applyColorCorrection(Pixel[][] grid) {
-        int maxDensity = findMaxDensity(grid);
-        double logMaxDensity = Math.log(maxDensity); // Логарифм с добавлением 1 для устойчивости
+    protected void applyColorCorrection(Frame frame) {
+        int maxDensity = findMaxDensity(frame);
+        double logMaxDensity = Math.log(maxDensity);
 
-        // Гамма-значение для коррекции
-        final double GAMMA = 1.5;
-
-        for (int y = 0; y < grid.length; y++) {
-            for (int x = 0; x < grid[y].length; x++) {
-                int hitCount = grid[y][x].hitCount();
+        for (int y = 0; y < frame.height(); y++) {
+            for (int x = 0; x < frame.width(); x++) {
+                Pixel currentPixel = frame.getPixel(x, y);
+                int hitCount = currentPixel.hitCount();
                 // Нормализуем значение плотности с логарифмом
                 double normalizedDensity = Math.log(hitCount) / logMaxDensity;
 
@@ -35,25 +36,26 @@ public class GeneratorWithColorCorrection extends FractalGenerator {
                 double normalizedColorFactor = Math.pow(normalizedDensity, 1.0 / GAMMA);
 
                 // Применяем нормализованную плотность к каждому каналу цвета
-                int red = (int) Math.min(255, grid[y][x].red() * normalizedColorFactor);
-                int green = (int) Math.min(255, grid[y][x].green() * normalizedColorFactor);
-                int blue = (int) Math.min(255, grid[y][x].blue() * normalizedColorFactor);
+                int red = (int) Math.min(255, currentPixel.red() * normalizedColorFactor);
+                int green = (int) Math.min(255, currentPixel.green() * normalizedColorFactor);
+                int blue = (int) Math.min(255, currentPixel.blue() * normalizedColorFactor);
 
                 // Обновляем пиксель с новыми значениями цветов
-                grid[y][x].red(red);
-                grid[y][x].green(green);
-                grid[y][x].blue(blue);
+                currentPixel.red(red);
+                currentPixel.green(green);
+                currentPixel.blue(blue);
             }
         }
     }
 
 
-    private static int findMaxDensity(Pixel[][] optionalGrid) {
+    protected static int findMaxDensity(Frame frame) {
         int max = 0;
-        for (Pixel[] row : optionalGrid) {
-            for (Pixel pixel : row) {
-                if (pixel.hitCount() > max) {
-                    max = pixel.hitCount();
+        for (int x = 0; x < frame.width(); x++) {
+            for (int y = 0; y < frame.width(); y++) {
+                Pixel curPixel = frame.getPixel(x, y);
+                if (curPixel != null && curPixel.hitCount() > max) {
+                    max = curPixel.hitCount();
                 }
             }
         }

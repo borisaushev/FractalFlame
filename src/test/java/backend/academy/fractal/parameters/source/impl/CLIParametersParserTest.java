@@ -1,40 +1,41 @@
 package backend.academy.fractal.parameters.source.impl;
 
-import backend.academy.fractal.grid.Frame;
 import backend.academy.fractal.parameters.FractalParameters;
+import backend.academy.fractal.parameters.FrameParameters;
+import backend.academy.fractal.parameters.generator.ParametersGenerator;
 import backend.academy.fractal.parameters.source.CLInputSource;
 import backend.academy.fractal.transformation.FractalTransformation;
-import backend.academy.fractal.transformation.NonLinearTransformation;
+import backend.academy.fractal.transformation.impl.NonLinearTransformation;
 import backend.academy.fractal.transformation.color.TransformationColor;
 import backend.academy.fractal.transformation.impl.AffineTransformation;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
 
-import static backend.academy.fractal.transformation.NonLinearTransformation.SINUSOIDAL;
-import static backend.academy.fractal.transformation.NonLinearTransformation.SPHERICAL;
+import static backend.academy.fractal.transformation.impl.NonLinearTransformation.SINUSOIDAL;
+import static backend.academy.fractal.transformation.impl.NonLinearTransformation.SPHERICAL;
 import static backend.academy.fractal.transformation.color.TransformationColor.GOLD;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class CLIParametersParserTest {
 
     @Mock
     private CLInputSource clReaderMock;
 
+    @Spy
+    private ParametersGenerator generator;
+
     @InjectMocks
     private CLIParametersParser parser;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @DisplayName("getting all parameters")
     @Test
@@ -57,12 +58,13 @@ class CLIParametersParserTest {
         // then
         assertTrue(params.isPresent());
         FractalParameters fractalParameters = params.get();
-        assertEquals(800, params.get().frame().width());
-        assertEquals(600, params.get().frame().height());
+        assertEquals(800, params.get().frameParameters().width());
+        assertEquals(600, params.get().frameParameters().height());
         assertEquals(2, fractalParameters.transformations().size());
         assertEquals(FractalParameters.MIN_ITERATIONS, fractalParameters.iterations());
     }
 
+    @DisplayName("parsing iterations")
     @Test
     void getIterations() {
         // given
@@ -85,6 +87,7 @@ class CLIParametersParserTest {
         assertTrue(parsedVal4.isEmpty());
     }
 
+    @DisplayName("parsing transformations list")
     @Test
     void getTransformationsList() {
         // given
@@ -109,15 +112,16 @@ class CLIParametersParserTest {
 
         // then
         assertTrue(transformations1.isPresent());
-        assertEquals(6, transformations1.get().size());
+        assertEquals(ParametersGenerator.DEFAULT_FUNCTIONS_COUNT, transformations1.get().size());
         assertTrue(transformations2.isEmpty());
         assertTrue(transformations3.isEmpty());
         assertTrue(transformations4.isPresent());
         assertEquals(2, transformations4.get().size());
     }
 
+    @DisplayName("parsing frame parameters")
     @Test
-    void getFrame() {
+    void getFrameParameters() {
         // given
         when(clReaderMock.nextLine())
             .thenReturn("800 600") // Valid input
@@ -125,9 +129,9 @@ class CLIParametersParserTest {
             .thenReturn("invalid input"); // Non-numeric input
 
         // when
-        Optional<Frame> frame1 = parser.getFrame();
-        Optional<Frame> frame2 = parser.getFrame();
-        Optional<Frame> frame3 = parser.getFrame();
+        Optional<FrameParameters> frame1 = parser.getFrameParameters();
+        Optional<FrameParameters> frame2 = parser.getFrameParameters();
+        Optional<FrameParameters> frame3 = parser.getFrameParameters();
 
         // then
         assertTrue(frame1.isPresent());
@@ -137,6 +141,7 @@ class CLIParametersParserTest {
         assertTrue(frame3.isEmpty());
     }
 
+    @DisplayName("parsing a single affine transformation")
     @Test
     void getAffineTransformation() {
         // given
@@ -165,6 +170,7 @@ class CLIParametersParserTest {
         assertTrue(transformation4.isEmpty());
     }
 
+    @DisplayName("parsing transformation color")
     @Test
     void getTransformationColors() {
         // given
@@ -188,6 +194,7 @@ class CLIParametersParserTest {
         assertTrue(color4.isEmpty());
     }
 
+    @DisplayName("parsing transformations list")
     @Test
     void getNLTransformationsList() {
         // given

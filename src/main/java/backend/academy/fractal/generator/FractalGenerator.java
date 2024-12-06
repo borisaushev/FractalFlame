@@ -1,10 +1,11 @@
 package backend.academy.fractal.generator;
 
-import backend.academy.fractal.grid.Pixel;
-import backend.academy.fractal.parameters.FractalParameters;
-import backend.academy.fractal.parameters.source.ParameterSource;
+import backend.academy.fractal.grid.Frame;
+import org.springframework.stereotype.Component;
 import java.util.Optional;
 
+@Component
 public interface FractalGenerator {
-    Optional<Pixel[][]> generate();
+    int MIN_ITERATIONS = 0;
+    Optional<Frame> generate();
 }

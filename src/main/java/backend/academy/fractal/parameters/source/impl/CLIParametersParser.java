@@ -1,12 +1,12 @@
 package backend.academy.fractal.parameters.source.impl;
 
-import backend.academy.fractal.grid.Frame;
 import backend.academy.fractal.parameters.FractalParameters;
-import backend.academy.fractal.parameters.ParametersGenerator;
+import backend.academy.fractal.parameters.FrameParameters;
+import backend.academy.fractal.parameters.generator.ParametersGenerator;
 import backend.academy.fractal.parameters.source.CLInputSource;
 import backend.academy.fractal.parameters.source.ParameterSource;
 import backend.academy.fractal.transformation.FractalTransformation;
-import backend.academy.fractal.transformation.NonLinearTransformation;
+import backend.academy.fractal.transformation.impl.NonLinearTransformation;
 import backend.academy.fractal.transformation.color.TransformationColor;
 import backend.academy.fractal.transformation.impl.AffineTransformation;
 import java.util.LinkedList;
@@ -14,34 +14,39 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import static backend.academy.fractal.parameters.ParametersGenerator.DEFAULT_FUNCTIONS_COUNT;
+import static backend.academy.fractal.parameters.generator.ParametersGenerator.DEFAULT_FUNCTIONS_COUNT;
 
 @Component
 public class CLIParametersParser implements ParameterSource {
     @Autowired
     private CLInputSource clReader;
+    @Autowired
+    private ParametersGenerator parametersGenerator;
 
     public Optional<FractalParameters> getParameters() {
-        Optional<Frame> optionalFrame = getFrame();
-        if (optionalFrame.isEmpty()) {
+        Optional<FrameParameters> optionalParameters = getFrameParameters();
+        if (optionalParameters.isEmpty()) {
+            System.out.println("Неправильные параметры изображения");
             return Optional.empty();
         }
 
         Optional<List<FractalTransformation>> optionalTransformations = getTransformationsList();
         if (optionalTransformations.isEmpty()) {
+            System.out.println("Неправильно введены параметры трансформаций");
             return Optional.empty();
         }
 
         Optional<Integer> optionalIterations = getIterations();
         if (optionalIterations.isEmpty()) {
+            System.out.println("Неверно указанно количество итераций");
             return Optional.empty();
         }
 
-        Frame frame = optionalFrame.get();
+        FrameParameters frameParameters = optionalParameters.get();
         List<FractalTransformation> transformations = optionalTransformations.get();
         int iterations = optionalIterations.get();
 
-        return Optional.of(new FractalParameters(frame, transformations, iterations));
+        return Optional.of(new FractalParameters(frameParameters, transformations, iterations));
     }
 
     public Optional<Integer> getIterations() {
@@ -64,7 +69,7 @@ public class CLIParametersParser implements ParameterSource {
             System.out.printf("(Пустая строка для генерации %d преобразований)\n", DEFAULT_FUNCTIONS_COUNT);
             String input = clReader.nextLine();
             if (input.isEmpty()) {
-                return Optional.of(ParametersGenerator.generateTransformations());
+                return Optional.of(parametersGenerator.generateTransformations());
             }
 
             int count = Integer.parseInt(input);
@@ -130,7 +135,7 @@ public class CLIParametersParser implements ParameterSource {
 
         String input = clReader.nextLine().trim();
         if (input.isEmpty()) {
-            return Optional.of(ParametersGenerator.generateAffineTransformation());
+            return Optional.of(parametersGenerator.generateAffineTransformation());
         }
 
         try {
@@ -166,7 +171,7 @@ public class CLIParametersParser implements ParameterSource {
         String input = clReader.nextLine();
 
         if (input.isEmpty()) {
-            return Optional.of(ParametersGenerator.generateNonLinearTransformationList());
+            return Optional.of(parametersGenerator.generateNonLinearTransformationList());
         }
 
         try {
@@ -197,7 +202,7 @@ public class CLIParametersParser implements ParameterSource {
         return transformationsList.toString();
     }
 
-    public Optional<Frame> getFrame() {
+    public Optional<FrameParameters> getFrameParameters() {
         System.out.println("Введите размеры фрактала (ширина и высота в пикселях через пробел)");
         String input = clReader.nextLine();
         try {
@@ -205,7 +210,7 @@ public class CLIParametersParser implements ParameterSource {
             int width = Integer.parseInt(parameters[0]);
             int height = Integer.parseInt(parameters[1]);
 
-            return Optional.of(new Frame(height, width));
+            return Optional.of(new FrameParameters(height, width));
         } catch (Exception exc) {
             return Optional.empty();
         }

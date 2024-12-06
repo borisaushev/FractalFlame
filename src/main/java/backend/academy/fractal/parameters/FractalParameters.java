@@ -5,7 +5,7 @@ import backend.academy.fractal.transformation.FractalTransformation;
 import java.util.List;
 
 public record FractalParameters(
-    Frame frame,
+    FrameParameters frameParameters,
     List<FractalTransformation> transformations,
     int iterations
 ) {

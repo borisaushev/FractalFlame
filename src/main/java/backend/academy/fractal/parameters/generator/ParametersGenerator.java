@@ -1,21 +1,21 @@
-package backend.academy.fractal.parameters;
+package backend.academy.fractal.parameters.generator;
 
 import backend.academy.fractal.transformation.FractalTransformation;
-import backend.academy.fractal.transformation.NonLinearTransformation;
+import backend.academy.fractal.transformation.impl.NonLinearTransformation;
 import backend.academy.fractal.transformation.color.TransformationColor;
 import backend.academy.fractal.transformation.impl.AffineTransformation;
+import org.springframework.stereotype.Component;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+@Component
 public class ParametersGenerator {
+    public static final int DEFAULT_FUNCTIONS_COUNT = 10;
 
-    public static final int DEFAULT_FUNCTIONS_COUNT = 100;
+    private final Random random = new Random();
 
-    private ParametersGenerator(){}
-    private static final Random random = new Random();
-
-    public static List<FractalTransformation> generateTransformations() {
+    public List<FractalTransformation> generateTransformations() {
         TransformationColor[] predefinedColors = TransformationColor.values();
 
         List<FractalTransformation> result = new LinkedList<>();
@@ -31,7 +31,8 @@ public class ParametersGenerator {
 
         return result;
     }
-    public static List<NonLinearTransformation> generateNonLinearTransformationList() {
+
+    public List<NonLinearTransformation> generateNonLinearTransformationList() {
         List<NonLinearTransformation> nonLinearList = new LinkedList<>();
         int nonLinearFunctionsCount = random.nextInt(NonLinearTransformation.values().length) + 1;
         nonLinearFunctionsCount = Math.min(3, nonLinearFunctionsCount);
@@ -43,7 +44,7 @@ public class ParametersGenerator {
         return nonLinearList;
     }
 
-    public static AffineTransformation generateAffineTransformation() {
+    public AffineTransformation generateAffineTransformation() {
         double[] coefficients = new double[6];
         for (int j = 0; j < 6; j++) {
             coefficients[j] = random.nextDouble() * 2 - 1; // Коэффициенты в диапазоне [-1, 1]
@@ -58,5 +59,4 @@ public class ParametersGenerator {
             coefficients[5]
         );
     }
-
 }

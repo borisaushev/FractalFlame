@@ -2,7 +2,6 @@ package backend.academy.fractal.transformation.color;
 
 import java.awt.Color;
 import java.util.Optional;
-import backend.academy.fractal.transformation.NonLinearTransformation;
 import lombok.Getter;
 
 public enum TransformationColor {

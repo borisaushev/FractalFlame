@@ -1,7 +1,9 @@
-package backend.academy.fractal.transformation;
+package backend.academy.fractal.transformation.impl;
 
 import backend.academy.fractal.grid.BiUnitPoint;
 import java.util.Optional;
+
+import backend.academy.fractal.transformation.TransformationFunction;
 import lombok.Getter;
 import static java.lang.Math.PI;
 import static java.lang.Math.atan2;
