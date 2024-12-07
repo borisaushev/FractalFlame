@@ -1,5 +1,6 @@
-package backend.academy.fractal.generator.impl;
+package backend.academy.fractal.generator;
 
+import backend.academy.fractal.generator.impl.GeneratorWithColorCorrection;
 import backend.academy.fractal.generator.impl.parallel.MultiThreadGenerator;
 import backend.academy.fractal.parameters.FractalParameters;
 import backend.academy.fractal.parameters.FrameParameters;
@@ -23,18 +24,15 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class PerformanceTest {
+    @Spy
+    ParametersGenerator parametersGenerator;
+    @InjectMocks
+    volatile MultiThreadGenerator multiThreadGenerator;
+    @InjectMocks
+    volatile GeneratorWithColorCorrection generatorWithColorCorrection;
     @Mock
     @Qualifier("CLIParametersParser")
     private ParameterSource parameterSource;
-
-    @Spy
-    ParametersGenerator parametersGenerator;
-
-    @InjectMocks
-    volatile MultiThreadGenerator multiThreadGenerator;
-
-    @InjectMocks
-    volatile GeneratorWithColorCorrection generatorWithColorCorrection;
 
     @DisplayName("Testing multi thread advantage")
     @RepeatedTest(10)
@@ -56,7 +54,7 @@ public class PerformanceTest {
             .name("SingleThreadGenerator")
             .priority(MAX_PRIORITY)
             .start(() -> {
-                assert generatorWithColorCorrection.generate().isPresent();
+                generatorWithColorCorrection.generate(parameterSource).isPresent();
             })
             .join();
         long time1 = currentTimeMillis() - start1;
@@ -66,7 +64,7 @@ public class PerformanceTest {
             .name("MultiThreadGenerator")
             .priority(MAX_PRIORITY)
             .start(() -> {
-                assert multiThreadGenerator.generate().isPresent();
+                assert multiThreadGenerator.generate(parameterSource).isPresent();
             })
             .join();
         long time2 = currentTimeMillis() - start2;

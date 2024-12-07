@@ -1,9 +1,12 @@
 package backend.academy.fractal.parameters.source;
 
-import lombok.Getter;
-import org.springframework.stereotype.Component;
 import java.util.Scanner;
+import org.springframework.stereotype.Component;
 
+/**
+ * A utility class to read input from the command line (CLI).
+ * Simply is a wrapper for a {@link Scanner} instance.
+ */
 @Component
 public class CLInputSource {
     private final static Scanner scanner = new Scanner(System.in);

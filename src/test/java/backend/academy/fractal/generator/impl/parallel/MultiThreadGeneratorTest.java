@@ -1,5 +1,6 @@
-package backend.academy.fractal.generator.impl;
+package backend.academy.fractal.generator.impl.parallel;
 
+import backend.academy.fractal.generator.impl.SingleThreadFractalGenerator;
 import backend.academy.fractal.grid.Frame;
 import backend.academy.fractal.grid.Pixel;
 import backend.academy.fractal.parameters.FractalParameters;
@@ -25,16 +26,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class GeneratorWithColorCorrectionTest {
-    @InjectMocks
-    GeneratorWithColorCorrection generator;
-    @Spy
-    ParametersGenerator parametersGenerator;
+class MultiThreadGeneratorTest {
     @Mock
     @Qualifier("CLIParametersParser")
-    private ParameterSource parameterSource;
+    ParameterSource parameterSource;
+
+    @Spy
+    ParametersGenerator parametersGenerator;
+
     @InjectMocks
-    private SingleThreadFractalGenerator singleThreadFractalGenerator;
+    MultiThreadGenerator multiThreadGenerator;
+
+    @InjectMocks
+    SingleThreadFractalGenerator singleThreadGenerator;
 
     @Test
     @DisplayName("No parameters provided")
@@ -43,7 +47,7 @@ class GeneratorWithColorCorrectionTest {
         when(parameterSource.getParameters()).thenReturn(Optional.empty());
 
         //When
-        Optional<Frame> result = generator.generate(parameterSource);
+        Optional<Frame> result = multiThreadGenerator.generate(parameterSource);
 
         //Then
         assertTrue(result.isEmpty());
@@ -64,9 +68,9 @@ class GeneratorWithColorCorrectionTest {
             .thenReturn(Optional.of(fractalParameters));
 
         //When
-        Optional<Frame> result = generator.generate(parameterSource);
+        Optional<Frame> result = multiThreadGenerator.generate(parameterSource);
         //Getting a frame without color correction to compare
-        Optional<Frame> singleThreadResult = singleThreadFractalGenerator.generate(parameterSource);
+        Optional<Frame> singleThreadResult = singleThreadGenerator.generate(parameterSource);
 
         //Then
         assertFalse(result.isEmpty());

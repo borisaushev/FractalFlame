@@ -5,9 +5,11 @@ import backend.academy.fractal.parameters.FrameParameters;
 import backend.academy.fractal.parameters.generator.ParametersGenerator;
 import backend.academy.fractal.parameters.source.CLInputSource;
 import backend.academy.fractal.transformation.FractalTransformation;
-import backend.academy.fractal.transformation.impl.NonLinearTransformation;
 import backend.academy.fractal.transformation.color.TransformationColor;
 import backend.academy.fractal.transformation.impl.AffineTransformation;
+import backend.academy.fractal.transformation.impl.NonLinearTransformation;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,15 +17,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Optional;
-
+import static backend.academy.fractal.transformation.color.TransformationColor.GOLD;
 import static backend.academy.fractal.transformation.impl.NonLinearTransformation.SINUSOIDAL;
 import static backend.academy.fractal.transformation.impl.NonLinearTransformation.SPHERICAL;
-import static backend.academy.fractal.transformation.color.TransformationColor.GOLD;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CLIParametersParserTest {

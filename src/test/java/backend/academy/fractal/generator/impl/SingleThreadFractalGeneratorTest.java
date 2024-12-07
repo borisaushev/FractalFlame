@@ -26,15 +26,13 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SingleThreadFractalGeneratorTest {
+    @InjectMocks
+    SingleThreadFractalGenerator generator;
+    @Spy
+    ParametersGenerator parametersGenerator;
     @Mock
     @Qualifier("CLIParametersParser")
     private ParameterSource parameterSource;
-
-    @InjectMocks
-    SingleThreadFractalGenerator generator;
-
-    @Spy
-    ParametersGenerator parametersGenerator;
 
     @Test
     @DisplayName("No parameters provided")
@@ -43,7 +41,7 @@ class SingleThreadFractalGeneratorTest {
         when(parameterSource.getParameters()).thenReturn(Optional.empty());
 
         //When
-        Optional<Frame> result = generator.generate();
+        Optional<Frame> result = generator.generate(parameterSource);
 
         //Then
         assertTrue(result.isEmpty());
@@ -62,7 +60,7 @@ class SingleThreadFractalGeneratorTest {
         when(parameterSource.getParameters()).thenReturn(Optional.of(fractalParameters));
 
         //When
-        Optional<Frame> result = generator.generate();
+        Optional<Frame> result = generator.generate(parameterSource);
 
         //Then
         assertFalse(result.isEmpty());

@@ -15,6 +15,17 @@ public final class Frame {
         this.pixelGrid = new Pixel[height][width];
     }
 
+    /**
+     * Converts a bi-unit coordinate to a frame coordinate.
+     * <p>
+     * The bi-unit coordinate is assumed to be in the range [-1, 1] for both x and y axes.
+     * The frame coordinate is calculated by scaling and translating the bi-unit point
+     * to fit within the dimensions of the frame.
+     * </p>
+     *
+     * @param point the bi-unit coordinate to convert
+     * @return the corresponding {@link FramePoint} in the frame
+     */
     public FramePoint convertToFramePoint(BiUnitPoint point) {
         int px = (int) ((point.x()) / 4.0 * width() + (double) width() / 2);
         int py = (int) ((point.y()) / 4.0 * height() + (double) height() / 2);
@@ -22,7 +33,7 @@ public final class Frame {
     }
 
     public Pixel getPixel(int x, int y) {
-        if(pixelGrid()[y][x] == null) {
+        if (pixelGrid()[y][x] == null) {
             pixelGrid()[y][x] = new Pixel();
         }
         return pixelGrid()[y][x];

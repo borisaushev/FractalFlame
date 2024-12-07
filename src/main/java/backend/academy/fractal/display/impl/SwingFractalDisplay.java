@@ -10,8 +10,14 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import org.springframework.stereotype.Component;
 
+/**
+ * Used for displaying a generated fractal using java Swing
+ */
 @Component("SwingFractalDisplay")
 public class SwingFractalDisplay implements FractalProcessor {
+    /**
+     * @param frame generated fractal ({@link Frame} instance) to be displayed
+     */
     @Override
     public void processFractal(Frame frame) {
         JFrame jFrame = new JFrame("Fractal Image");
@@ -42,5 +48,4 @@ public class SwingFractalDisplay implements FractalProcessor {
         jFrame.setLocationRelativeTo(null);
         jFrame.setVisible(true);
     }
-
 }

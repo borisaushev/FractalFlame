@@ -2,29 +2,21 @@ package backend.academy.fractal.transformation.impl;
 
 import backend.academy.fractal.grid.BiUnitPoint;
 import backend.academy.fractal.transformation.TransformationFunction;
-import lombok.Getter;
 
-@Getter
-public class AffineTransformation implements TransformationFunction {
-    private final double a;
-    private final double b;
-    private final double c;
-    private final double d;
-    private final double e;
-    private final double f;
+/**
+ * Represents an affine transformation applied to a BiUnitPoint.
+ */
+public record AffineTransformation(double a, double b, double c, double d, double e, double f)
+    implements TransformationFunction {
 
-    public AffineTransformation(double a, double b, double c, double d, double e, double f) {
-        this.a = a;
-        this.b = b;
-        this.c = c;
-        this.d = d;
-        this.e = e;
-        this.f = f;
-    }
-
+    /**
+     * Applies the affine transformation to a given {@link BiUnitPoint}
+     *
+     * @param p The point to transform.
+     */
     @Override
     public void transform(BiUnitPoint p) {
-        p.x(a*p.x() + b*p.y() + c);
-        p.y(d*p.x() + e*p.y() + f);
+        p.x(a * p.x() + b * p.y() + c);
+        p.y(d * p.x() + e * p.y() + f);
     }
 }

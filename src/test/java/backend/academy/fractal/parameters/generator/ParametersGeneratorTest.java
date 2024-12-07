@@ -1,18 +1,20 @@
 package backend.academy.fractal.parameters.generator;
 
 import backend.academy.fractal.transformation.FractalTransformation;
-import backend.academy.fractal.transformation.impl.NonLinearTransformation;
 import backend.academy.fractal.transformation.impl.AffineTransformation;
+import backend.academy.fractal.transformation.impl.NonLinearTransformation;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class ParametersGeneratorTest {
+@ExtendWith(MockitoExtension.class)
+public class ParametersGeneratorTest {
 
     @Spy
     ParametersGenerator parametersGenerator;
@@ -42,8 +44,8 @@ class ParametersGeneratorTest {
 
         //Then
         assertNotNull(transformations);
-        assertEquals(ParametersGenerator.DEFAULT_FUNCTIONS_COUNT, transformations.size());
         for (NonLinearTransformation transformation : transformations) {
+            assertThat(transformations.size()).isLessThanOrEqualTo(ParametersGenerator.MAX_NL_TRANSFORMATIONS);
             assertNotNull(transformation);
         }
     }
