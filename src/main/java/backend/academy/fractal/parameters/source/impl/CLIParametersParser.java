@@ -181,7 +181,7 @@ public class CLIParametersParser implements ParameterSource {
      */
     private String colorList() {
         StringBuilder colorList = new StringBuilder();
-        for (var color : TransformationColor.values()) {
+        for (TransformationColor color : TransformationColor.values()) {
             colorList.append(color.index());
             colorList.append(". ");
             colorList.append(color);
@@ -272,7 +272,8 @@ public class CLIParametersParser implements ParameterSource {
             String[] parameters = input.split(" ");
             for (String parameter : parameters) {
                 int index = Integer.parseInt(parameter);
-                var optionalTransformation = NonLinearTransformation.getByIndex(index);
+                Optional<NonLinearTransformation> optionalTransformation
+                    = NonLinearTransformation.getByIndex(index);
                 if (optionalTransformation.isEmpty()) {
                     return Optional.empty();
                 }
@@ -308,7 +309,7 @@ public class CLIParametersParser implements ParameterSource {
      */
     private String transformationsList() {
         StringBuilder transformationsList = new StringBuilder();
-        for (var transformation : NonLinearTransformation.values()) {
+        for (NonLinearTransformation transformation : NonLinearTransformation.values()) {
             transformationsList.append(transformation.index());
             transformationsList.append(". ");
             transformationsList.append(transformation);

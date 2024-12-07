@@ -65,7 +65,7 @@ public enum NonLinearTransformation {
      * @return An Optional containing the corresponding NonLinearTransformation, or empty if not found.
      */
     public static Optional<NonLinearTransformation> getByIndex(int index) {
-        for (var transformation : NonLinearTransformation.values()) {
+        for (NonLinearTransformation transformation : NonLinearTransformation.values()) {
             if (transformation.index == index) {
                 return Optional.of(transformation);
             }

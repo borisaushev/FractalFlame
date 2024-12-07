@@ -22,7 +22,7 @@ public record FractalTransformation(
      */
     public void applyTo(BiUnitPoint point) {
         affineTransformation.transform(point);
-        for (var nlTransformation : nonLinearTransformationList) {
+        for (NonLinearTransformation nlTransformation : nonLinearTransformationList) {
             nlTransformation.transform(point);
         }
     }

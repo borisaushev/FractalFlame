@@ -37,7 +37,7 @@ public enum TransformationColor {
      * @return An Optional containing the color or empty if not found.
      */
     public static Optional<TransformationColor> getByIndex(int index) {
-        for (var color : TransformationColor.values()) {
+        for (TransformationColor color : TransformationColor.values()) {
             if (color.index == index) {
                 return Optional.of(color);
             }
