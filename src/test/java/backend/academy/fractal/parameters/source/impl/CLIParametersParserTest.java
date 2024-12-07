@@ -221,4 +221,32 @@ class CLIParametersParserTest {
         assertTrue(list4.isEmpty());
         assertTrue(list5.isEmpty());
     }
+
+    @DisplayName("parsing thread count")
+    @Test
+    void getThreadCount() {
+        // given
+        when(clReaderMock.nextLine())
+            .thenReturn("4")
+            .thenReturn("14a")
+            .thenReturn("")
+            .thenReturn("0")
+            .thenReturn("-1");
+
+        // when
+        Optional<Integer> parsedVal1 = parser.getThreadCount();
+        Optional<Integer> parsedVal2 = parser.getThreadCount();
+        Optional<Integer> parsedVal3 = parser.getThreadCount();
+        Optional<Integer> parsedVal4 = parser.getThreadCount();
+        Optional<Integer> parsedVal5 = parser.getThreadCount();
+
+        // then
+        assertTrue(parsedVal1.isPresent());
+        assertEquals(4, parsedVal1.orElseThrow());
+        assertTrue(parsedVal2.isEmpty());
+        assertTrue(parsedVal3.isPresent());
+        assertEquals(Runtime.getRuntime().availableProcessors(), parsedVal3.orElseThrow());
+        assertTrue(parsedVal4.isEmpty());
+        assertTrue(parsedVal5.isEmpty());
+    }
 }

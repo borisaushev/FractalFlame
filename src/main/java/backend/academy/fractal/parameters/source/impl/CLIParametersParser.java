@@ -82,7 +82,7 @@ public class CLIParametersParser implements ParameterSource {
      *     if valid(or available at the time if the input is blank);
      *     otherwise, an empty {@link Optional}.
      */
-    private Optional<Integer> getThreadCount() {
+    public Optional<Integer> getThreadCount() {
         System.out.println("Enter the number of threads (leave empty for auto configuration):");
         String input = clReader.nextLine();
         if (input.isEmpty()) {
@@ -91,7 +91,7 @@ public class CLIParametersParser implements ParameterSource {
 
         try {
             int threadCount = Integer.parseInt(input);
-            if (threadCount < 0) {
+            if (threadCount < 1) {
                 return Optional.empty();
             }
             return Optional.of(threadCount);
