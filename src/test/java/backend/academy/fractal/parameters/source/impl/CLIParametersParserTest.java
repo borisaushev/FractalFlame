@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CLIParametersParserTest {
-
     @Mock
     private CLInputSource clReaderMock;
 

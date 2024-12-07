@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 @SuppressFBWarnings("PREDICTABLE_RANDOM")
 @Component
 public class SingleThreadFractalGenerator implements FractalGenerator {
-
     private static final Random RANDOM = new Random();
 
     /**

@@ -29,7 +29,6 @@ import static backend.academy.fractal.parameters.generator.ParametersGenerator.D
 @SuppressFBWarnings({"CLI_CONSTANT_LIST_INDEX"})
 @Component
 public class CLIParametersParser implements ParameterSource {
-
     @Autowired
     private CLInputSource clReader;
 

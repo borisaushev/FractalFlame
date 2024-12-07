@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 @SuppressFBWarnings({"PREDICTABLE_RANDOM", "CLI_CONSTANT_LIST_INDEX"})
 @Component
 public class ParametersGenerator {
-
     /**
      * Default number of transformation functions to generate.
      */

@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
 public class ParametersGeneratorTest {
-
     @Spy
     ParametersGenerator parametersGenerator;
 

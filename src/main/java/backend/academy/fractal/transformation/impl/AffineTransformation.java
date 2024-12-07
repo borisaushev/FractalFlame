@@ -8,7 +8,6 @@ import backend.academy.fractal.transformation.TransformationFunction;
  */
 public record AffineTransformation(double a, double b, double c, double d, double e, double f)
     implements TransformationFunction {
-
     /**
      * Applies the affine transformation to a given {@link BiUnitPoint}
      *

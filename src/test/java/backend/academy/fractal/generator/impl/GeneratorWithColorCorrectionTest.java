@@ -40,15 +40,15 @@ class GeneratorWithColorCorrectionTest extends FractalGeneratorTest {
             .thenReturn(Optional.of(fractalParameters));
 
         //When
-        Optional<Frame> parallelResult = generatorWithColorCorrection.generate(parameterSource);
+        Optional<Frame> correctedResult = generatorWithColorCorrection.generate(parameterSource);
         //Getting a frame without color correction to compare
-        Optional<Frame> singleThreadResult = singleThreadFractalGenerator.generate(parameterSource);
+        Optional<Frame> notCorrectedResult = singleThreadFractalGenerator.generate(parameterSource);
 
         //Then
-        assertFalse(parallelResult.isEmpty());
-        assertFalse(singleThreadResult.isEmpty());
-        Frame singleThreadFrame = singleThreadResult.orElseThrow();
-        Frame parallelFrame = parallelResult.orElseThrow();
+        assertFalse(correctedResult.isEmpty());
+        assertFalse(notCorrectedResult.isEmpty());
+        Frame singleThreadFrame = notCorrectedResult.orElseThrow();
+        Frame parallelFrame = correctedResult.orElseThrow();
         super.assertNotEmpty(parallelFrame);
         super.assertFramesAreDifferent(parallelFrame, singleThreadFrame);
     }

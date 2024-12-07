@@ -7,7 +7,6 @@ import java.util.Optional;
  * Interface for obtaining fractal parameters
  */
 public interface ParameterSource {
-
     /**
      * Retrieves the parameters for generating a fractal.
      *
