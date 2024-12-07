@@ -33,9 +33,7 @@ public class MultiThreadGenerator extends GeneratorWithColorCorrection implement
         for (int y = yStart; y < Math.min(yEnd, frame.height()); y++) {
             for (int x = 0; x < frame.width(); x++) {
                 Pixel currentPixel = frame.getPixel(x, y);
-                synchronized (currentPixel) {
-                    correctPixel(currentPixel, logMaxDensity);
-                }
+                correctPixel(currentPixel, logMaxDensity);
             }
         }
     }
@@ -115,10 +113,8 @@ public class MultiThreadGenerator extends GeneratorWithColorCorrection implement
             if (i > PRE_ITERATIONS && frame.pointInBounds(framePoint)) {
                 Pixel curPixel = frame.getPixel(framePoint);
                 TransformationColor transformationColor = transform.color();
-                synchronized (curPixel) {
-                    updatePixel(curPixel, transformationColor);
-                    curPixel.hit();
-                }
+                updatePixel(curPixel, transformationColor);
+                curPixel.hit();
             }
         }
     }

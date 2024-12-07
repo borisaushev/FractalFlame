@@ -72,6 +72,7 @@ public class CLIParametersParser implements ParameterSource {
         int iterations = optionalIterations.orElseThrow();
         int threadCount = optionalThreadCount.orElseThrow();
 
+        System.out.println("All parameters are valid, cooking started");
         return Optional.of(new FractalParameters(frameParameters, transformations, iterations, threadCount));
     }
 

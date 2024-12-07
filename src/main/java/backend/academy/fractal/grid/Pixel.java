@@ -1,9 +1,9 @@
 package backend.academy.fractal.grid;
 
 import java.awt.Color;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -14,26 +14,25 @@ import lombok.ToString;
  * how many times the pixel was "hit" during fractal generation.
  * </p>
  */
-@Getter
 @Setter
 @AllArgsConstructor
 @EqualsAndHashCode
 @ToString
 public class Pixel {
-    private int red;
-    private int green;
-    private int blue;
-    private int hitCount;
+    private AtomicInteger red;
+    private AtomicInteger green;
+    private AtomicInteger blue;
+    private AtomicInteger hitCount;
 
     /**
      * Default constructor initializes the pixel with no color (black)
      * and a hit count of zero.
      */
     public Pixel() {
-        red = 0;
-        green = 0;
-        blue = 0;
-        hitCount = 0;
+        red = new AtomicInteger(0);
+        green = new AtomicInteger(0);
+        blue = new AtomicInteger(0);
+        hitCount = new AtomicInteger(0);
     }
 
     /**
@@ -44,7 +43,7 @@ public class Pixel {
      * </p>
      */
     public void hit() {
-        hitCount++;
+        hitCount.incrementAndGet();
     }
 
     /**
@@ -53,6 +52,34 @@ public class Pixel {
      * @return the RGB value of the pixel in the format used by {@link Color#getRGB()}
      */
     public int getRgb() {
-        return new Color(red, green, blue).getRGB();
+        return new Color(red.intValue(), green.intValue(), blue.intValue()).getRGB();
+    }
+
+    public void green(int green) {
+        this.green.set(green);
+    }
+
+    public void blue(int blue) {
+        this.blue.set(blue);
+    }
+
+    public void red(int red) {
+        this.red.set(red);
+    }
+
+    public int red() {
+        return this.red.get();
+    }
+
+    public int blue() {
+        return this.blue.get();
+    }
+
+    public int green() {
+        return this.green.get();
+    }
+
+    public int hitCount() {
+        return this.hitCount.get();
     }
 }

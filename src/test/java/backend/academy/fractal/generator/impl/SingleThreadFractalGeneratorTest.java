@@ -1,17 +1,14 @@
 package backend.academy.fractal.generator.impl;
 
 import backend.academy.fractal.grid.Frame;
-import backend.academy.fractal.grid.Pixel;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static java.awt.Color.BLACK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -44,24 +41,9 @@ class SingleThreadFractalGeneratorTest extends FractalGeneratorTest {
 
         //Then
         assertFalse(result.isEmpty());
-        Frame frame = result.orElseThrow();
-        assertEquals(fractalParameters.frameParameters().width(), frame.width());
-        assertEquals(fractalParameters.frameParameters().height(), frame.height());
-        int notNullCount = 0;
-        int notBlackCount = 0;
-        for (int x = 0; x < frame.width(); x++) {
-            for (int y = 0; y < frame.height(); y++) {
-                Pixel pixel = frame.getPixel(x, y);
-                if (pixel == null) {
-                    continue;
-                }
-                notNullCount++;
-                if (pixel.getRgb() != BLACK.getRGB()) {
-                    notBlackCount++;
-                }
-            }
-        }
-        assertNotEquals(0, notNullCount);
-        assertNotEquals(0, notBlackCount);
+        Frame parallelFrame = result.orElseThrow();
+        assertEquals(fractalParameters.frameParameters().width(), parallelFrame.width());
+        assertEquals(fractalParameters.frameParameters().height(), parallelFrame.height());
+        super.assertNotEmpty(parallelFrame);
     }
 }

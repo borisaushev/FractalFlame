@@ -18,7 +18,7 @@ public class FractalFlame {
     @Qualifier("CLIParametersParser")
     protected ParameterSource parameterSource;
     @Autowired
-    @Qualifier("MultiThreadGenerator")
+    @Qualifier("GeneratorWithSymmetry")
     private FractalGenerator generator;
     @Autowired
     @Qualifier("SwingFractalDisplay")
