@@ -14,6 +14,8 @@ public interface FractalGenerator {
     int PRE_ITERATIONS = 10;
 
     /**
+     * Generates fractal based on provided parameters
+     *
      * @param parameterSource source of fractal parameters
      * @return generated fractal
      */

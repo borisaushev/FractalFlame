@@ -17,6 +17,7 @@ public class GeneratorWithColorCorrection extends SingleThreadFractalGenerator i
      * Gamma correction factor for color adjustment.
      */
     public static final double GAMMA = 1.5;
+    public static final int MAX_COLOR = 255;
 
     /**
      * Adjusts the color of a single pixel using gamma correction.
@@ -29,9 +30,9 @@ public class GeneratorWithColorCorrection extends SingleThreadFractalGenerator i
         double normalizedDensity = Math.log(hitCount) / logMaxDensity;
         double normalizedColorFactor = Math.pow(normalizedDensity, 1.0 / GAMMA);
 
-        int red = (int) Math.min(255, currentPixel.red() * normalizedColorFactor);
-        int green = (int) Math.min(255, currentPixel.green() * normalizedColorFactor);
-        int blue = (int) Math.min(255, currentPixel.blue() * normalizedColorFactor);
+        int red = (int) Math.min(MAX_COLOR, currentPixel.red() * normalizedColorFactor);
+        int green = (int) Math.min(MAX_COLOR, currentPixel.green() * normalizedColorFactor);
+        int blue = (int) Math.min(MAX_COLOR, currentPixel.blue() * normalizedColorFactor);
 
         currentPixel.red(red);
         currentPixel.green(green);
@@ -61,7 +62,8 @@ public class GeneratorWithColorCorrection extends SingleThreadFractalGenerator i
      * Generates a fractal and applies color correction to enhance the image.
      *
      * @param parameterSource the source providing fractal parameters
-     * @return an {@link Optional} containing the generated and corrected {@link Frame}, or empty if parameters are not provided
+     * @return an {@link Optional} containing the generated and corrected {@link Frame},
+     *     or empty if parameters are not provided
      */
     @Override
     public Optional<Frame> generate(ParameterSource parameterSource) {
@@ -70,7 +72,7 @@ public class GeneratorWithColorCorrection extends SingleThreadFractalGenerator i
             return Optional.empty();
         }
 
-        applyColorCorrection(optionalGrid.get());
+        applyColorCorrection(optionalGrid.orElseThrow());
         return optionalGrid;
     }
 

@@ -1,5 +1,6 @@
 package backend.academy.fractal.parameters.source;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import org.springframework.stereotype.Component;
 
@@ -9,9 +10,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CLInputSource {
-    private final static Scanner scanner = new Scanner(System.in);
+    private final static Scanner SCANNER = new Scanner(System.in, StandardCharsets.UTF_8);
 
     public String nextLine() {
-        return scanner.nextLine();
+        return SCANNER.nextLine();
     }
 }

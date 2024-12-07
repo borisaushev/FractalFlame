@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+/**
+ * Class used for generating fractal and handling the result
+ */
 @Component
 public class FractalFlame {
     @Autowired
@@ -26,6 +29,6 @@ public class FractalFlame {
         if (optionalFrame.isEmpty()) {
             return;
         }
-        fractalProcessor.processFractal(optionalFrame.get());
+        fractalProcessor.processFractal(optionalFrame.orElseThrow());
     }
 }

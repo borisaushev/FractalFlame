@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 public final class Frame {
+    public static final double COMPRESSION = 4.0;
     private final int height;
     private final int width;
     private final Pixel[][] pixelGrid;
@@ -27,8 +28,8 @@ public final class Frame {
      * @return the corresponding {@link FramePoint} in the frame
      */
     public FramePoint convertToFramePoint(BiUnitPoint point) {
-        int px = (int) ((point.x()) / 4.0 * width() + (double) width() / 2);
-        int py = (int) ((point.y()) / 4.0 * height() + (double) height() / 2);
+        int px = (int) ((point.x()) / COMPRESSION * width() + (double) width() / 2);
+        int py = (int) ((point.y()) / COMPRESSION * height() + (double) height() / 2);
         return new FramePoint(px, py);
     }
 

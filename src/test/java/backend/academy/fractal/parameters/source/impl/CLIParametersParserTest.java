@@ -56,9 +56,9 @@ class CLIParametersParserTest {
 
         // then
         assertTrue(params.isPresent());
-        FractalParameters fractalParameters = params.get();
-        assertEquals(800, params.get().frameParameters().width());
-        assertEquals(600, params.get().frameParameters().height());
+        FractalParameters fractalParameters = params.orElseThrow();
+        assertEquals(800, params.orElseThrow().frameParameters().width());
+        assertEquals(600, params.orElseThrow().frameParameters().height());
         assertEquals(2, fractalParameters.transformations().size());
         assertEquals(FractalParameters.MIN_ITERATIONS, fractalParameters.iterations());
     }
@@ -80,7 +80,7 @@ class CLIParametersParserTest {
         Optional<Integer> parsedVal4 = parser.getIterations();
 
         // then
-        assertEquals(FractalParameters.MIN_ITERATIONS, parsedVal1.get());
+        assertEquals(FractalParameters.MIN_ITERATIONS, parsedVal1.orElseThrow());
         assertTrue(parsedVal2.isEmpty());
         assertTrue(parsedVal3.isEmpty());
         assertTrue(parsedVal4.isEmpty());
@@ -111,11 +111,11 @@ class CLIParametersParserTest {
 
         // then
         assertTrue(transformations1.isPresent());
-        assertEquals(ParametersGenerator.DEFAULT_FUNCTIONS_COUNT, transformations1.get().size());
+        assertEquals(ParametersGenerator.DEFAULT_FUNCTIONS_COUNT, transformations1.orElseThrow().size());
         assertTrue(transformations2.isEmpty());
         assertTrue(transformations3.isEmpty());
         assertTrue(transformations4.isPresent());
-        assertEquals(2, transformations4.get().size());
+        assertEquals(2, transformations4.orElseThrow().size());
     }
 
     @DisplayName("parsing frame parameters")
@@ -134,8 +134,8 @@ class CLIParametersParserTest {
 
         // then
         assertTrue(frame1.isPresent());
-        assertEquals(800, frame1.get().width());
-        assertEquals(600, frame1.get().height());
+        assertEquals(800, frame1.orElseThrow().width());
+        assertEquals(600, frame1.orElseThrow().height());
         assertTrue(frame2.isEmpty());
         assertTrue(frame3.isEmpty());
     }
@@ -158,12 +158,12 @@ class CLIParametersParserTest {
 
         // then
         assertTrue(transformation1.isPresent());
-        assertEquals(0.1, transformation1.get().a());
-        assertEquals(0.2, transformation1.get().b());
-        assertEquals(0.3, transformation1.get().c());
-        assertEquals(0.4, transformation1.get().d());
-        assertEquals(0.5, transformation1.get().e());
-        assertEquals(0.6, transformation1.get().f());
+        assertEquals(0.1, transformation1.orElseThrow().a());
+        assertEquals(0.2, transformation1.orElseThrow().b());
+        assertEquals(0.3, transformation1.orElseThrow().c());
+        assertEquals(0.4, transformation1.orElseThrow().d());
+        assertEquals(0.5, transformation1.orElseThrow().e());
+        assertEquals(0.6, transformation1.orElseThrow().f());
         assertTrue(transformation2.isPresent());
         assertTrue(transformation3.isEmpty());
         assertTrue(transformation4.isEmpty());
@@ -187,7 +187,7 @@ class CLIParametersParserTest {
 
         // then
         assertTrue(color1.isPresent());
-        assertEquals(GOLD, color1.get());
+        assertEquals(GOLD, color1.orElseThrow());
         assertTrue(color2.isEmpty());
         assertTrue(color3.isEmpty());
         assertTrue(color4.isEmpty());
@@ -213,9 +213,9 @@ class CLIParametersParserTest {
 
         // then
         assertTrue(list1.isPresent());
-        assertEquals(2, list1.get().size());
-        assertEquals(SINUSOIDAL, list1.get().getFirst());
-        assertEquals(SPHERICAL, list1.get().get(1));
+        assertEquals(2, list1.orElseThrow().size());
+        assertEquals(SINUSOIDAL, list1.orElseThrow().getFirst());
+        assertEquals(SPHERICAL, list1.orElseThrow().get(1));
         assertTrue(list2.isPresent());
         assertTrue(list3.isEmpty());
         assertTrue(list4.isEmpty());

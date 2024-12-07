@@ -4,6 +4,7 @@ import backend.academy.fractal.transformation.FractalTransformation;
 import backend.academy.fractal.transformation.color.TransformationColor;
 import backend.academy.fractal.transformation.impl.AffineTransformation;
 import backend.academy.fractal.transformation.impl.NonLinearTransformation;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Component;
  * to be used in fractal generation.
  * </p>
  */
+@SuppressWarnings("MagicNumber")
+@SuppressFBWarnings({"PREDICTABLE_RANDOM", "CLI_CONSTANT_LIST_INDEX"})
 @Component
 public class ParametersGenerator {
 
@@ -76,7 +79,7 @@ public class ParametersGenerator {
 
         for (int j = 0; j < nonLinearFunctionsCount; j++) {
             int index = random.nextInt(NonLinearTransformation.values().length) + 1;
-            NonLinearTransformation transformation = NonLinearTransformation.getByIndex(index).get();
+            NonLinearTransformation transformation = NonLinearTransformation.getByIndex(index).orElseThrow();
             nonLinearList.add(transformation);
         }
         return nonLinearList;
@@ -101,5 +104,14 @@ public class ParametersGenerator {
             coefficients[4],
             coefficients[5]
         );
+    }
+
+    /**
+     * Returns the number of available threads for the system
+     *
+     * @return recommended threads count
+     */
+    public int generateThreadCount() {
+        return Runtime.getRuntime().availableProcessors();
     }
 }

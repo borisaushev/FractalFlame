@@ -21,8 +21,6 @@ import org.springframework.stereotype.Component;
  */
 @Component("MultiThreadGenerator")
 public class MultiThreadGenerator extends GeneratorWithColorCorrection implements FractalGenerator {
-    public static final int THREAD_COUNT = Runtime.getRuntime().availableProcessors();
-
     /**
      * applies color correction to a part of the frame
      *
@@ -53,14 +51,15 @@ public class MultiThreadGenerator extends GeneratorWithColorCorrection implement
         if (optionalParameters.isEmpty()) {
             return Optional.empty();
         }
-        FractalParameters parameters = optionalParameters.get();
+        FractalParameters parameters = optionalParameters.orElseThrow();
         Frame frame = new Frame(parameters.frameParameters());
 
-        try (ExecutorService service = Executors.newFixedThreadPool(THREAD_COUNT)) {
+        int threadCount = parameters.threadsCount();
+        try (ExecutorService service = Executors.newFixedThreadPool(threadCount)) {
             int iterations = parameters.iterations();
-            for (int i = 0; i < iterations; i += (iterations / THREAD_COUNT)) {
+            for (int i = 0; i < iterations; i += (iterations / threadCount)) {
                 int start = i;
-                int end = i + iterations / THREAD_COUNT;
+                int end = i + iterations / threadCount;
                 service.submit(() -> generatePart(frame, parameters, start, end));
             }
             service.shutdown();
@@ -68,7 +67,7 @@ public class MultiThreadGenerator extends GeneratorWithColorCorrection implement
         } catch (InterruptedException ignored) {
             return Optional.empty();
         }
-        applyColorCorrection(frame);
+        applyColorCorrectionAsync(frame, threadCount);
 
         return Optional.of(frame);
     }
@@ -79,15 +78,14 @@ public class MultiThreadGenerator extends GeneratorWithColorCorrection implement
      *
      * @param frame given frame to apply color correction
      */
-    @Override
-    protected void applyColorCorrection(Frame frame) {
+    protected void applyColorCorrectionAsync(Frame frame, int threadCount) {
         int maxDensity = findMaxDensity(frame);
         double logMaxDensity = Math.log(maxDensity);
 
-        try (ExecutorService service = Executors.newFixedThreadPool(THREAD_COUNT)) {
-            for (int y = 0; y < frame.height(); y += frame.height() / THREAD_COUNT) {
+        try (ExecutorService service = Executors.newFixedThreadPool(threadCount)) {
+            for (int y = 0; y < frame.height(); y += frame.height() / threadCount) {
                 int start = y;
-                int end = y + frame.height() / THREAD_COUNT;
+                int end = y + frame.height() / threadCount;
                 service.execute(() -> correctPart(frame, logMaxDensity, start, end));
             }
             service.shutdown();

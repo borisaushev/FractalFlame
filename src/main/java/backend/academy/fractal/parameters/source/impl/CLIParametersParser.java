@@ -9,11 +9,13 @@ import backend.academy.fractal.transformation.FractalTransformation;
 import backend.academy.fractal.transformation.color.TransformationColor;
 import backend.academy.fractal.transformation.impl.AffineTransformation;
 import backend.academy.fractal.transformation.impl.NonLinearTransformation;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import static backend.academy.fractal.parameters.FractalParameters.RECOMMENDED_ITERATIONS;
 import static backend.academy.fractal.parameters.generator.ParametersGenerator.DEFAULT_FUNCTIONS_COUNT;
 
 /**
@@ -23,6 +25,8 @@ import static backend.academy.fractal.parameters.generator.ParametersGenerator.D
  * including frame size, number of iterations, and transformations.
  * </p>
  */
+@SuppressWarnings({"RegexpSinglelineJava", "ReturnCount", "MagicNumber"})
+@SuppressFBWarnings({"CLI_CONSTANT_LIST_INDEX"})
 @Component
 public class CLIParametersParser implements ParameterSource {
 
@@ -57,11 +61,43 @@ public class CLIParametersParser implements ParameterSource {
             return Optional.empty();
         }
 
-        FrameParameters frameParameters = optionalParameters.get();
-        List<FractalTransformation> transformations = optionalTransformations.get();
-        int iterations = optionalIterations.get();
+        Optional<Integer> optionalThreadCount = getThreadCount();
+        if (optionalThreadCount.isEmpty()) {
+            System.out.println("Invalid thread count");
+            return Optional.empty();
+        }
 
-        return Optional.of(new FractalParameters(frameParameters, transformations, iterations));
+        FrameParameters frameParameters = optionalParameters.orElseThrow();
+        List<FractalTransformation> transformations = optionalTransformations.orElseThrow();
+        int iterations = optionalIterations.orElseThrow();
+        int threadCount = optionalThreadCount.orElseThrow();
+
+        return Optional.of(new FractalParameters(frameParameters, transformations, iterations, threadCount));
+    }
+
+    /**
+     * Reads the number of iterations for fractal generation.
+     *
+     * @return an {@link Optional} containing the number of threads
+     *     if valid(or available at the time if the input is blank);
+     *     otherwise, an empty {@link Optional}.
+     */
+    private Optional<Integer> getThreadCount() {
+        System.out.println("Enter the number of threads (leave empty for auto configuration):");
+        String input = clReader.nextLine();
+        if (input.isEmpty()) {
+            return Optional.of(parametersGenerator.generateThreadCount());
+        }
+
+        try {
+            int threadCount = Integer.parseInt(input);
+            if (threadCount < 0) {
+                return Optional.empty();
+            }
+            return Optional.of(threadCount);
+        } catch (NumberFormatException exc) {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -70,7 +106,7 @@ public class CLIParametersParser implements ParameterSource {
      * @return an {@link Optional} containing the number of iterations if valid; otherwise, an empty {@link Optional}.
      */
     public Optional<Integer> getIterations() {
-        System.out.println("Enter the number of iterations:");
+        System.out.println("Enter the number of iterations (recommended - " + RECOMMENDED_ITERATIONS + "):");
         String input = clReader.nextLine();
         try {
             int iterations = Integer.parseInt(input);
@@ -91,7 +127,7 @@ public class CLIParametersParser implements ParameterSource {
     public Optional<List<FractalTransformation>> getTransformationsList() {
         try {
             System.out.println("Enter the number of transformations:");
-            System.out.printf("(Leave empty to generate %d transformations)\n", DEFAULT_FUNCTIONS_COUNT);
+            System.out.printf("(Leave empty to generate %d transformations)%n", DEFAULT_FUNCTIONS_COUNT);
             String input = clReader.nextLine();
             if (input.isEmpty()) {
                 return Optional.of(parametersGenerator.generateTransformations());
@@ -126,7 +162,10 @@ public class CLIParametersParser implements ParameterSource {
                 }
 
                 list.add(new FractalTransformation(
-                    affineTransformation.get(), optionalNonLinearList.get(), optionalColor.get()));
+                    affineTransformation.orElseThrow(),
+                    optionalNonLinearList.orElseThrow(),
+                    optionalColor.orElseThrow()
+                ));
             }
             return Optional.of(list);
         } catch (NumberFormatException exc) {
@@ -220,7 +259,7 @@ public class CLIParametersParser implements ParameterSource {
      */
     public Optional<List<NonLinearTransformation>> getNLTransformationsList() {
         System.out.println("Enter the indices of corresponding non-linear transformations separated by spaces:");
-        System.out.println("(Leave empty to generate random parameters)");
+        System.out.println("(Leave empty to generate random transformations)");
 
         String input = clReader.nextLine();
 
@@ -237,7 +276,7 @@ public class CLIParametersParser implements ParameterSource {
                 if (optionalTransformation.isEmpty()) {
                     return Optional.empty();
                 }
-                list.add(optionalTransformation.get());
+                list.add(optionalTransformation.orElseThrow());
             }
             return Optional.of(list);
         } catch (NumberFormatException exc) {

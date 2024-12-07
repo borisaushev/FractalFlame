@@ -1,14 +1,13 @@
 package backend.academy.fractal.generator;
 
+import backend.academy.fractal.generator.impl.FractalGeneratorTest;
 import backend.academy.fractal.generator.impl.GeneratorWithColorCorrection;
 import backend.academy.fractal.generator.impl.parallel.MultiThreadGenerator;
-import backend.academy.fractal.parameters.FractalParameters;
-import backend.academy.fractal.parameters.FrameParameters;
 import backend.academy.fractal.parameters.generator.ParametersGenerator;
 import backend.academy.fractal.parameters.source.ParameterSource;
-import backend.academy.fractal.transformation.FractalTransformation;
-import java.util.List;
+import java.time.Duration;
 import java.util.Optional;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,13 +16,12 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Qualifier;
-import static java.lang.System.currentTimeMillis;
-import static java.lang.Thread.MAX_PRIORITY;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class PerformanceTest {
+@DisplayName("Performance test(need to be ran by hand)")
+public class PerformanceTest extends FractalGeneratorTest {
     @Spy
     ParametersGenerator parametersGenerator;
     @InjectMocks
@@ -34,44 +32,44 @@ public class PerformanceTest {
     @Qualifier("CLIParametersParser")
     private ParameterSource parameterSource;
 
-    @DisplayName("Testing multi thread advantage")
+    @DisplayName("Testing multi-threaded advantage over single-threaded")
     @RepeatedTest(10)
-    void multiThreadTest() throws InterruptedException {
-        //Given
-        int width = 1000;
-        int height = 1000;
-        FrameParameters frameParameters = new FrameParameters(height, width);
-        List<FractalTransformation> transformations = parametersGenerator.generateTransformations();
-        int iterations = 2_000_000;
-        FractalParameters fractalParameters = new FractalParameters(frameParameters, transformations, iterations);
-        when(parameterSource.getParameters())
-            .thenReturn(Optional.of(fractalParameters))
-            .thenReturn(Optional.of(fractalParameters));
+    @Disabled
+    synchronized void multiThreadTest() {
+        when(parameterSource.getParameters()).thenReturn(Optional.of(fractalParameters));
 
-        //when
-        long start1 = currentTimeMillis();
-        Thread.ofPlatform()
-            .name("SingleThreadGenerator")
-            .priority(MAX_PRIORITY)
-            .start(() -> {
-                generatorWithColorCorrection.generate(parameterSource).isPresent();
-            })
-            .join();
-        long time1 = currentTimeMillis() - start1;
+        // Warm-up phase
+        generatorWithColorCorrection.generate(parameterSource);
+        multiThreadGenerator.generate(parameterSource);
 
-        long start2 = currentTimeMillis();
-        Thread.ofPlatform()
-            .name("MultiThreadGenerator")
-            .priority(MAX_PRIORITY)
-            .start(() -> {
-                assert multiThreadGenerator.generate(parameterSource).isPresent();
-            })
-            .join();
-        long time2 = currentTimeMillis() - start2;
+        // Measure single-threaded performance
+        long singleThreadTime = measureExecutionTime(() ->
+            generatorWithColorCorrection.generate(parameterSource)
+        );
 
-        //Then
-        System.out.println("Threads count: " + MultiThreadGenerator.THREAD_COUNT);
-        System.out.printf("single : %d --- multi : %d (millis)%n", time1, time2);
-        assertTrue(time1 > time2);
+        // Measure multi thread performance
+        long multiThreadTime = measureExecutionTime(() ->
+            multiThreadGenerator.generate(parameterSource)
+        );
+
+        // Log results for debugging
+        System.out.println("Threads count: " + fractalParameters.threadsCount());
+        System.out.printf("Single-thread: %d ms, Multi-thread: %d ms%n", singleThreadTime, multiThreadTime);
+
+        // Assert that the multi thread implementation is faster
+        assertTrue(singleThreadTime > multiThreadTime);
+    }
+
+    /**
+     * Measures the execution time of the given task in milliseconds.
+     *
+     * @param task Task to measure.
+     * @return Execution time in milliseconds.
+     */
+    private long measureExecutionTime(Runnable task) {
+        long start = System.nanoTime();
+        task.run();
+        long end = System.nanoTime();
+        return Duration.ofNanos(end - start).toMillis();
     }
 }

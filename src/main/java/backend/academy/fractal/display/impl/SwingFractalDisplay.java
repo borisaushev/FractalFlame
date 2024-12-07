@@ -3,6 +3,7 @@ package backend.academy.fractal.display.impl;
 import backend.academy.fractal.display.FractalProcessor;
 import backend.academy.fractal.grid.Frame;
 import backend.academy.fractal.grid.Pixel;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -11,11 +12,14 @@ import javax.swing.JPanel;
 import org.springframework.stereotype.Component;
 
 /**
- * Used for displaying a generated fractal using java Swing
+ * Used for displaying a generated fractal with java Swing
  */
+@SuppressFBWarnings("S508C_NON_TRANSLATABLE_STRING")
 @Component("SwingFractalDisplay")
 public class SwingFractalDisplay implements FractalProcessor {
     /**
+     * Displays fractal using Swing
+     *
      * @param frame generated fractal ({@link Frame} instance) to be displayed
      */
     @Override

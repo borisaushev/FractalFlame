@@ -9,6 +9,7 @@ import backend.academy.fractal.parameters.FractalParameters;
 import backend.academy.fractal.parameters.source.ParameterSource;
 import backend.academy.fractal.transformation.FractalTransformation;
 import backend.academy.fractal.transformation.color.TransformationColor;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -18,10 +19,11 @@ import org.springframework.stereotype.Component;
  * Single-threaded implementation of {@link FractalGenerator}.
  * Generates a fractal based on provided parameters using a single thread.
  */
+@SuppressFBWarnings("PREDICTABLE_RANDOM")
 @Component
 public class SingleThreadFractalGenerator implements FractalGenerator {
 
-    private static final Random random = new Random();
+    private static final Random RANDOM = new Random();
 
     /**
      * Updates a pixel's color and hit count based on the transformation color.
@@ -48,7 +50,7 @@ public class SingleThreadFractalGenerator implements FractalGenerator {
      * @return a randomly selected {@link FractalTransformation}
      */
     protected static FractalTransformation selectTransform(List<FractalTransformation> transformations) {
-        int index = random.nextInt(transformations.size());
+        int index = RANDOM.nextInt(transformations.size());
         return transformations.get(index);
     }
 
@@ -64,7 +66,7 @@ public class SingleThreadFractalGenerator implements FractalGenerator {
         if (optionalParameters.isEmpty()) {
             return Optional.empty();
         }
-        FractalParameters parameters = optionalParameters.get();
+        FractalParameters parameters = optionalParameters.orElseThrow();
         Frame frame = generate(parameters);
 
         return Optional.of(frame);

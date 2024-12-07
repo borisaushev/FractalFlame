@@ -1,23 +1,15 @@
 package backend.academy.fractal.generator.impl.parallel;
 
+import backend.academy.fractal.generator.impl.FractalGeneratorTest;
 import backend.academy.fractal.generator.impl.SingleThreadFractalGenerator;
 import backend.academy.fractal.grid.Frame;
 import backend.academy.fractal.grid.Pixel;
-import backend.academy.fractal.parameters.FractalParameters;
-import backend.academy.fractal.parameters.FrameParameters;
-import backend.academy.fractal.parameters.generator.ParametersGenerator;
-import backend.academy.fractal.parameters.source.ParameterSource;
-import backend.academy.fractal.transformation.FractalTransformation;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Qualifier;
 import static java.awt.Color.BLACK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -26,14 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MultiThreadGeneratorTest {
-    @Mock
-    @Qualifier("CLIParametersParser")
-    ParameterSource parameterSource;
-
-    @Spy
-    ParametersGenerator parametersGenerator;
-
+class MultiThreadGeneratorTest extends FractalGeneratorTest {
     @InjectMocks
     MultiThreadGenerator multiThreadGenerator;
 
@@ -57,12 +42,6 @@ class MultiThreadGeneratorTest {
     @DisplayName("All parameters provided")
     void generate() {
         //Given
-        int width = 1000;
-        int height = 1000;
-        FrameParameters frameParameters = new FrameParameters(height, width);
-        List<FractalTransformation> transformations = parametersGenerator.generateTransformations();
-        int iterations = 1_000_000;
-        FractalParameters fractalParameters = new FractalParameters(frameParameters, transformations, iterations);
         when(parameterSource.getParameters())
             .thenReturn(Optional.of(fractalParameters))
             .thenReturn(Optional.of(fractalParameters));
@@ -75,10 +54,10 @@ class MultiThreadGeneratorTest {
         //Then
         assertFalse(result.isEmpty());
         assertFalse(singleThreadResult.isEmpty());
-        Frame singleThreadFrame = singleThreadResult.get();
-        Frame frame = result.get();
-        assertEquals(width, frame.width());
-        assertEquals(height, frame.height());
+        Frame singleThreadFrame = singleThreadResult.orElseThrow();
+        Frame frame = result.orElseThrow();
+        assertEquals(fractalParameters.frameParameters().width(), frame.width());
+        assertEquals(fractalParameters.frameParameters().height(), frame.height());
         int notNullCount = 0;
         int notBlackCount = 0;
         int nonEqualPixels = 0;
