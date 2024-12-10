@@ -33,7 +33,7 @@ public class SwingFractalDisplay implements FractalProcessor {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                // Создаем BufferedImage из матрицы пикселей
+                //Creating an image
                 BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
                 for (int y = 0; y < height; y++) {
                     for (int x = 0; x < width; x++) {
@@ -41,7 +41,7 @@ public class SwingFractalDisplay implements FractalProcessor {
                         image.setRGB(x, y, pixel.getRgb());
                     }
                 }
-                // Рисуем изображение на панели
+                //Displaying it
                 g.drawImage(image, 0, 0, this.getWidth(), this.getHeight(), null);
             }
         };
