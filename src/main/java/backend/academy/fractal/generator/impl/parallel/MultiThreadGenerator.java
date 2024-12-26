@@ -21,6 +21,9 @@ import org.springframework.stereotype.Component;
  */
 @Component("MultiThreadGenerator")
 public class MultiThreadGenerator extends GeneratorWithColorCorrection implements FractalGenerator {
+    public static final int TIMEOUT = 20;
+    public static final TimeUnit TIMEOUT_UNIT = TimeUnit.MINUTES;
+
     /**
      * applies color correction to a part of the frame
      *
@@ -64,7 +67,7 @@ public class MultiThreadGenerator extends GeneratorWithColorCorrection implement
             }
             service.shutdown();
             //With 2e9 iterations it takes that long
-            service.awaitTermination(20, TimeUnit.MINUTES);
+            service.awaitTermination(TIMEOUT, TIMEOUT_UNIT);
         } catch (InterruptedException ignored) {
             return Optional.empty();
         }
