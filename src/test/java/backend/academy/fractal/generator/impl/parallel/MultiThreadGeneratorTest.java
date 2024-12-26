@@ -45,7 +45,6 @@ class MultiThreadGeneratorTest extends FractalGeneratorTest {
 
         //When
         Optional<Frame> result = multiThreadGenerator.generate(parameterSource);
-        //Getting a frame without color correction to compare
         Optional<Frame> singleThreadResult = singleThreadGenerator.generate(parameterSource);
 
         //Then

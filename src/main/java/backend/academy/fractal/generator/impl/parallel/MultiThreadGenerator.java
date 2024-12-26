@@ -63,7 +63,8 @@ public class MultiThreadGenerator extends GeneratorWithColorCorrection implement
                 service.submit(() -> generatePart(frame, parameters, start, end));
             }
             service.shutdown();
-            service.awaitTermination(1, TimeUnit.HOURS);
+            //With 2e9 iterations it takes that long
+            service.awaitTermination(20, TimeUnit.MINUTES);
         } catch (InterruptedException ignored) {
             return Optional.empty();
         }

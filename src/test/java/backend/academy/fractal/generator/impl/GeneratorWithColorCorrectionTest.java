@@ -41,7 +41,6 @@ class GeneratorWithColorCorrectionTest extends FractalGeneratorTest {
 
         //When
         Optional<Frame> correctedResult = generatorWithColorCorrection.generate(parameterSource);
-        //Getting a frame without color correction to compare
         Optional<Frame> notCorrectedResult = singleThreadFractalGenerator.generate(parameterSource);
 
         //Then
